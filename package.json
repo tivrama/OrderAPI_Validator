@@ -1,0 +1,28 @@
+{
+  "name": "OrderAPI_Validator",
+  "version": "1.0.0",
+  "description": "Validate your package",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "7.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tivrama/something"
+  },
+  "keywords": [],
+  "author": "joel",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "method-override": "^2.3.6",
+    "mongoose": "^4.4.19",
+    "request": "^2.74.0"
+  }
+}

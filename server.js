@@ -5,11 +5,27 @@ var express        = require('express');
 var app            = express();
 var bodyParser     = require('body-parser');
 var methodOverride = require('method-override');
+var mongoose       = require('mongoose');
 // configuration ===========================================
 
 
 // set our port
 var port = process.env.PORT || 3001; 
+// config files
+var db = require('./config/db.js');
+
+//----------------------------
+// connect to our mongoDB database 
+// (uncomment after establishing credentials in config/db.js)
+mongoose.connect(db.url); 
+
+mongoose.connect(db.url, function (err, res) {
+  if (err) {
+    console.log ('ERROR connecting to: ' + db.url + '. ' + err);
+  } else {
+    console.log ('Succeeded connected to: ' + db.url);
+  }
+});
 
 
 //----------------------------
@@ -32,7 +48,7 @@ app.use(express.static(__dirname + '/'));
 // app.use(express.static(path.resolve(__dirname + '/')));
 
 // routes ==================================================
-require('./server/routes')(app); // configure our routes
+require('./routes')(app); // configure our routes
 
 // start app ===============================================
 // startup our app at http://localhost:3000

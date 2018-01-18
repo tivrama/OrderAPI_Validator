@@ -1,7 +1,7 @@
 var path = require('path');
 var request = require('request');
 var helper = require('./js/helpfunctions.js');
-
+var OrderAPISchema = require('./models/json.js');
 
     module.exports = function(app) {
 
@@ -17,7 +17,11 @@ var helper = require('./js/helpfunctions.js');
 
         // Call to get order info and return alerts type codes and names
         app.post('/api/validator', function(req, res) {
+            // call function to validate JSON
 
+
+
+            // save to MongoDB
        
         });
 
@@ -26,7 +30,7 @@ var helper = require('./js/helpfunctions.js');
         // frontend routes =========================================================
         // route to handle all requests
         app.get('*', function(req, res) {
-            res.sendFile(path.join(__dirname, '../client', 'index.html'));
+            res.sendFile(path.join(__dirname, './client', 'index.html'));
         });
 
     };
