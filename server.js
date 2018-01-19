@@ -17,7 +17,7 @@ var db = require('./config/db.js');
 //----------------------------
 // connect to our mongoDB database 
 // (uncomment after establishing credentials in config/db.js)
-mongoose.connect(db.url); 
+// mongoose.connect(db.url); 
 
 mongoose.connect(db.url, function (err, res) {
   if (err) {
