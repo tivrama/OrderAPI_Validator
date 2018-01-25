@@ -4,5 +4,6 @@ var mongoose = require('mongoose');
 
 module.exports = mongoose.model('OrderAPI', {
   retailer : {type : String, default: ''},
+  order : {type : String, default: ''},
   json : {type : String, default: ''}
 });

@@ -36,3 +36,8 @@
 	"Error": "Malformed JSON"
 }
 ```
+
+## UI
+
+UI will hav checkboxes for each product (Returns, Alerts, Monitor)
+Response will have subdevied payload by product
