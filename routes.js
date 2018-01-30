@@ -7,11 +7,21 @@ var OrderAPISchema = require('./models/json.js');
 
 
 
-        app.get('/api/test', function(req, res) {
-            console.log('INSIDE GET!!!');
-            var test = "Hello from inside /api/test - GET";
-                res.send(test);
+        app.get('/api/retriever', function(req, res) {
+            console.log('INSIDE RETRIEVER!!!');
+
+            var retailer = req.query.retailer;
+            var order = req.query.order;
+
+            order.find(function(err, retailerOrder) {
+                if (err) {
+                    res.send(err);
+                }
+                res.json(retailerOrder);
+            });
+
         });
+
 
 
 
@@ -58,9 +68,8 @@ var OrderAPISchema = require('./models/json.js');
                 }
             });
 
-
-
         });
+
 
 
 
