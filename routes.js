@@ -13,13 +13,12 @@ var OrderAPISchema = require('./models/json.js');
             var retailer = req.query.retailer;
             var order = req.query.order;
 
-            order.find(function(err, retailerOrder) {
+            OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
                 if (err) {
                     res.send(err);
                 }
                 res.json(retailerOrder);
             });
-
         });
 
 
