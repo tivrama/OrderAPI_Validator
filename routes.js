@@ -17,7 +17,7 @@ var OrderAPISchema = require('./models/json.js');
                 if (err) {
                     res.send(err);
                 }
-                res.json(retailerOrder);
+                res.send(retailerOrder);
             });
         });
 
@@ -48,7 +48,7 @@ var OrderAPISchema = require('./models/json.js');
             // Save json to MongoDB
             var newEntry = new OrderAPISchema({
                 retailer : retailer,
-                order : req.body.order_info.order_number,
+                order : req.body.order_info ? req.body.order_info.order_number : 1,
                 json : saveJSON
             });
 

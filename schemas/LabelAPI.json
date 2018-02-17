@@ -1,0 +1,10 @@
+{
+  "return_reference_number": "123456",
+  "order_number": "783273755",
+  "order_items": [
+    {
+      "sku": "12121-111-71",
+      "quantity": 1
+    }
+  ]
+}
