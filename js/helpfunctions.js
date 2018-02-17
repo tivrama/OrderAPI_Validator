@@ -35,12 +35,10 @@ module.exports = {
 
 		var temp = json;
 		for (var attribute in json) {
-
 			for (var schemaAttribute in response) {
 				if (attribute === schemaAttribute) {
 					delete temp[attribute]
 				}
-
 			}
 		}
 		
