@@ -6,6 +6,8 @@ module.exports = {
 
 	},
 
+
+
 	checkItemsArray: function(itemsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
 		var itemsValidation = [];
@@ -45,6 +47,12 @@ module.exports = {
 				}
 				if (attribute === "item_image") {
 					validatedItem.item_image = helperFunctions.checkValidImage(itemObj[attribute], true);
+				}
+				if (attribute === "is_final_sale") {
+					validatedItem.is_final_sale = helperFunctions.checkValidBoolean(itemObj[attribute]);
+				}
+				if (attribute === "is_gift") {
+					validatedItem.is_gift = helperFunctions.checkValidBoolean(itemObj[attribute]);
 				}
 			}
 
@@ -101,6 +109,8 @@ module.exports = {
 		return itemsValidation;
 	},
 
+
+
 	checkShipmentsArray: function(shipmentsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
 		var shipmentsValidation = [];
@@ -118,6 +128,79 @@ module.exports = {
 		}
 		return shipmentsValidation
 	},
+
+
+
+	checkBillingObject: function(billing) {
+		if (billing.billed_to === undefined) {
+			return "Fail - 'billed_to' object is not found"
+		}
+
+		var validatedAddress = {
+			first_name: undefined,
+			last_name: undefined,
+			email: undefined,
+			address: undefined
+		};
+
+		var billingObj = billing.billed_to;
+		for (var attribute in billingObj) {
+			if (attribute === "first_name") {
+				validatedAddress.first_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+			}
+			if (attribute === "last_name") {
+				validatedAddress.last_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+			}
+			if (attribute === "email") {
+				validatedAddress.email = helperFunctions.checkValidEmail(billingObj[attribute], true);
+			}
+			if (attribute === "address") {
+				validatedAddress.address = helperFunctions.checkAddress(billingObj[attribute], true);
+			}
+		}
+
+		// Loop through validatedAddress and look for missed fields
+		for (var attribute in validatedAddress) {
+			if (validatedAddress[attribute] === undefined) {
+				switch(attribute) {
+				    case "first_name":
+				        validatedAddress.first_name = "Fail - No 'first_name'"
+				        break;
+				    case "last_name":
+				        validatedAddress.last_name = "Fail - No 'last_name'"
+				        break;
+				    case "email":
+				    	validatedAddress.email = "Fail - No 'email'"
+				    	break;
+				    case "address":
+				    	validatedAddress.address = "Fail - No 'address'"
+				    	break
+				    default:
+				}
+			}
+		}
+
+		return validatedAddress;
+	},
+
+
+
+	checkCustomerObject: function(customer) {
+		var validatedAddress = {
+			customer_id: undefined,
+			first_name: undefined,
+			last_name: undefined,
+			email: undefined,
+			address: undefined
+		};
+
+		for (var attribute in customer) {
+
+		}
+
+		return validatedAddress;
+	},
+
 
 	basicOrderAPICheck: function(json) {
 
@@ -165,11 +248,11 @@ module.exports = {
 			}
 
 			if ( attribute === 'billing') {
-				// TODO
+				passFailCheckList.billing = this.checkBillingObject(json[attribute]);
 			}
 
 			if ( attribute === 'customer') {
-				// TODO
+				passFailCheckList.customer = this.checkCustomerObject(json[attribute]);
 			}
 		}
 
@@ -190,7 +273,7 @@ module.exports = {
 				    	passFailCheckList.shipments = "Warning - No 'shipments' object"
 				    	break
 				    case "billing":
-				    	passFailCheckList.billing = "Warning - No 'billing' object"
+				    	passFailCheckList.billing = "Fail - No 'billing' object"
 				    	break
 				    case "customer":
 				    	passFailCheckList.customer = "Warning - No 'customer' object"
@@ -201,6 +284,7 @@ module.exports = {
 		}
 		return passFailCheckList;
 	},
+
 
 
 	alertCheck: function(json) {
@@ -227,6 +311,7 @@ module.exports = {
 		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
 		return orderAPIvalidation;
 	},
+
 
 
 	labelCheck: function(json) {
@@ -282,7 +367,6 @@ module.exports = {
 		}
 		productArray.push(product.slice(counter, product.length))
 
-
 		for (var j = 0; j < productArray.length; j++) {
 
 			if (productArray[j] === "ship") { // EDD Checkout
@@ -306,8 +390,6 @@ module.exports = {
 			}
 			
 		}
-
-
 
 		return productValidationArray.length > 1 ? productValidationArray : productValidationArray[0];
 	}

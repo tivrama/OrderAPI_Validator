@@ -11,6 +11,8 @@ module.exports = {
 		}
 	},
 
+
+
 	checkValidNumber: function(number, required) {
 		if (typeof(number) === "number") {
 			if (number > 0) {
@@ -22,6 +24,18 @@ module.exports = {
 			return required ? "Fail - invalid number" : "Warning - no value found"
 		}	
 	},
+
+
+
+	checkValidBoolean: function(boolean, required) {
+		if (typeof(boolean) === "boolean") {
+			return "Pass";
+		} else {
+			return required ? "Fail - invalid boolean" : "Warning - no value found"
+		}	
+	},
+
+
 
 	checkValidImage: function(image, required) {
 		if (typeof(image) === "string" && image !== "") {
@@ -39,6 +53,30 @@ module.exports = {
 			return required ? "Fail - invalid string" : "Warning - no value found"
 		}
 	},
+
+
+
+	validateEmail(email) {
+	    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;  
+	    return re.test(String(email).toLowerCase());
+	},
+
+	checkValidEmail: function(email, required) {
+		if (typeof(email) === "string" && email !== "") {
+			var checkFormat = this.validateEmail(email);
+			return checkFormat ? "Pass" : "Fail - invalid email"
+		} else {
+			return required ? "Fail - invalid email" : "Fail - no value found"
+		}
+	},
+
+
+
+	checkAddress: function(address) {
+
+	},
+
+
 
 	lookupCarrierCodes: function(code) {
 		var carrierExists = "fail";
