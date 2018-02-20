@@ -136,7 +136,7 @@ module.exports = {
 			return "Fail - 'billed_to' object is not found"
 		}
 
-		var validatedAddress = {
+		var validatedBilling = {
 			first_name: undefined,
 			last_name: undefined,
 			email: undefined,
@@ -146,47 +146,47 @@ module.exports = {
 		var billingObj = billing.billed_to;
 		for (var attribute in billingObj) {
 			if (attribute === "first_name") {
-				validatedAddress.first_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+				validatedBilling.first_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
 			}
 			if (attribute === "last_name") {
-				validatedAddress.last_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+				validatedBilling.last_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
 			}
 			if (attribute === "email") {
-				validatedAddress.email = helperFunctions.checkValidEmail(billingObj[attribute], true);
+				validatedBilling.email = helperFunctions.checkValidEmail(billingObj[attribute], true);
 			}
 			if (attribute === "address") {
-				validatedAddress.address = helperFunctions.checkAddress(billingObj[attribute], true);
+				validatedBilling.address = helperFunctions.checkAddress(billingObj[attribute], true);
 			}
 		}
 
-		// Loop through validatedAddress and look for missed fields
-		for (var attribute in validatedAddress) {
-			if (validatedAddress[attribute] === undefined) {
+		// Loop through validatedBilling and look for missed fields
+		for (var attribute in validatedBilling) {
+			if (validatedBilling[attribute] === undefined) {
 				switch(attribute) {
 				    case "first_name":
-				        validatedAddress.first_name = "Fail - No 'first_name'"
+				        validatedBilling.first_name = "Fail - No 'first_name'"
 				        break;
 				    case "last_name":
-				        validatedAddress.last_name = "Fail - No 'last_name'"
+				        validatedBilling.last_name = "Fail - No 'last_name'"
 				        break;
 				    case "email":
-				    	validatedAddress.email = "Fail - No 'email'"
+				    	validatedBilling.email = "Fail - No 'email'"
 				    	break;
 				    case "address":
-				    	validatedAddress.address = "Fail - No 'address'"
+				    	validatedBilling.address = "Fail - No 'address'"
 				    	break
 				    default:
 				}
 			}
 		}
 
-		return validatedAddress;
+		return validatedBilling;
 	},
 
 
 
 	checkCustomerObject: function(customer) {
-		var validatedAddress = {
+		var validatedCustomer = {
 			customer_id: undefined,
 			first_name: undefined,
 			last_name: undefined,
@@ -195,11 +195,51 @@ module.exports = {
 		};
 
 		for (var attribute in customer) {
-
+			if (attribute === "customer_id") {
+				validatedCustomer.customer_id = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "first_name") {
+				validatedCustomer.first_name = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "last_name") {
+				validatedCustomer.last_name = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "email") {
+				validatedCustomer.email = helperFunctions.checkValidEmail(customer[attribute], true);
+			}
+			if (attribute === "address") {
+				validatedCustomer.address = helperFunctions.checkAddress(customer[attribute], true);
+			}
 		}
 
-		return validatedAddress;
+		// Loop through validatedCustomer and look for missed fields
+		for (var attribute in validatedCustomer) {
+			if (validatedCustomer[attribute] === undefined) {
+				switch(attribute) {
+				    case "customer_id":
+				        validatedCustomer.customer_id = "Fail - No 'customer_id'"
+				        break;
+				    case "first_name":
+				        validatedCustomer.first_name = "Fail - No 'first_name'"
+				        break;
+				    case "last_name":
+				        validatedCustomer.last_name = "Fail - No 'last_name'"
+				        break;
+				    case "email":
+				    	validatedCustomer.email = "Fail - No 'email'"
+				    	break;
+				    case "address":
+				    	validatedCustomer.address = "Fail - No 'address'"
+				    	break
+				    default:
+				}
+			}
+		}
+
+		return validatedCustomer;
 	},
+
+
 
 
 	basicOrderAPICheck: function(json) {
