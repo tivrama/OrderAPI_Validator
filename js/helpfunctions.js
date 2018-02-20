@@ -2,20 +2,101 @@ var helperFunctions = require('./helperfunctions');
 
 module.exports = {
 
+	matchShipmentsToItems: function(shipments, items) {
+
+	},
+
 	checkItemsArray: function(itemsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
 		var itemsValidation = [];
 
 		var itemValidation = function (itemObj) {
-			var validatedItem = {};
+			var validatedItem = {
+				item_id: undefined,
+				sku: undefined,
+				name: undefined,
+				description: undefined,
+				quantity: undefined,
+				unit_price: undefined,
+				item_image: undefined,
+				is_final_sale: undefined,
+				is_gift: undefined		
+			};
+
 			for (var attribute in itemObj) {
-				// TODO
+
+				if (attribute === "sku") {
+					validatedItem.sku = helperFunctions.checkNonEmptyString(itemObj[attribute]);
+				}
+				if (attribute === "item_id") {
+					validatedItem.item_id = helperFunctions.checkNonEmptyString(itemObj[attribute]);
+				}
+				if (attribute === "name") {
+					validatedItem.name = helperFunctions.checkNonEmptyString(itemObj[attribute], true);
+				}
+				if (attribute === "description") {
+					validatedItem.description = helperFunctions.checkNonEmptyString(itemObj[attribute]);
+				}
+				if (attribute === "quantity") {
+					validatedItem.quantity = helperFunctions.checkValidNumber(itemObj[attribute], true);
+				}
+				if (attribute === "unit_price") {
+					validatedItem.unit_price = helperFunctions.checkValidNumber(itemObj[attribute], true);
+				}
+				if (attribute === "item_image") {
+					validatedItem.item_image = helperFunctions.checkValidImage(itemObj[attribute], true);
+				}
 			}
+
+			// Section for sku and item_id
+			if (validatedItem.sku === undefined) {
+				validatedItem.sku = "Warning - no value found";
+			}
+			if (validatedItem.sku[0] === "F" || validatedItem.sku[0] === "W") {
+				if (validatedItem.item_id === undefined) {
+					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
+					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
+				} else if (validatedItem.item_id[0] === "F" || validatedItem.item_id[0] === "W") {
+					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
+					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
+				}
+			}
+
+			// Loop through validatedItem and look for missed fields
+			for (var attribute in validatedItem) {
+				if (validatedItem[attribute] === undefined) {
+					switch(attribute) {
+					    case "name":
+					        validatedItem.name = "Fail - No 'name'"
+					        break;
+					    case "description":
+					        validatedItem.description = "Warning - No 'description'"
+					        break;
+					    case "quantity":
+					    	validatedItem.quantity = "Fail - No 'quantity'"
+					    	break;
+					    case "unit_price":
+					    	validatedItem.unit_price = "Fail - No 'unit_price'"
+					    	break
+					    case "item_image":
+					    	validatedItem.item_image = "Fail - No 'item_image'"
+					    	break
+					    case "is_final_sale":
+					    	validatedItem.is_final_sale = "Warning - No 'is_final_sale'"
+					    	break
+					    case "is_gift":
+					    	validatedItem.is_gift = "Warning - No 'is_gift'"
+					    	break
+					    default:
+					}
+				}
+			}
+
 			return validatedItem;
 		}
 
 		for (var i = 0; i < itemsArray.length; i++) {
-			itemsValidation.unshift(itemValidation(itemsArray[i]))
+			itemsValidation.push(itemValidation(itemsArray[i]))
 		}
 		return itemsValidation;
 	},
@@ -33,7 +114,7 @@ module.exports = {
 		}
 
 		for (var i = 0; i < shipmentsArray.length; i++) {
-			shipmentsValidation.unshift(shipmentValidation(shipmentsArray[i]))
+			shipmentsValidation.push(shipmentValidation(shipmentsArray[i]))
 		}
 		return shipmentsValidation
 	},
@@ -41,17 +122,17 @@ module.exports = {
 	basicOrderAPICheck: function(json) {
 
 		var passFailCheckList = {
-			order_number: null,
-			order_date: null,
-			order_items: null,
-			shipments: null,
-			billing: null,
-			customer: null
+			order_number: undefined,
+			order_date: undefined,
+			order_items: undefined,
+			shipments: undefined,
+			billing: undefined,
+			customer: undefined
 		};
 		// Look for parent level attributes validate
 		for (var attribute in json){
 			if (attribute === 'order_number') {
-				passFailCheckList.order_number = helperFunctions.checkNonEmptyString(json[attribute]);
+				passFailCheckList.order_number = helperFunctions.checkNonEmptyString(json[attribute], true);
 			}
 
 			if (attribute === 'order_date') {
@@ -93,26 +174,26 @@ module.exports = {
 		}
 
 		for (var parentAttributes in passFailCheckList) {
-			if (passFailCheckList[parentAttributes] === null) {
+			if (passFailCheckList[parentAttributes] === undefined) {
 
 				switch(parentAttributes) {
 				    case "order_number":
-				        passFailCheckList.order_number = "Fail - No order_number"
+				        passFailCheckList.order_number = "FAIL - No 'order_number'"
 				        break;
 				    case "order_date":
-				        passFailCheckList.order_date = "Fail - No order_date"
+				        passFailCheckList.order_date = "Fail - No 'order_date'"
 				        break;
 				    case "order_items":
-				    	passFailCheckList.order_items = "Fail - No order_items"
+				    	passFailCheckList.order_items = "Fail - No 'order_items'"
 				    	break;
 				    case "shipments":
-				    	passFailCheckList.shipments = "Warning - No shipments object"
+				    	passFailCheckList.shipments = "Warning - No 'shipments' object"
 				    	break
 				    case "billing":
-				    	passFailCheckList.billing = "Warning - No billing object"
+				    	passFailCheckList.billing = "Warning - No 'billing' object"
 				    	break
 				    case "customer":
-				    	passFailCheckList.customer = "Warning - No customer object"
+				    	passFailCheckList.customer = "Warning - No 'customer' object"
 				    	break
 				    default:
 				}
@@ -129,6 +210,7 @@ module.exports = {
 		}
 
 		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
 
 		return orderAPIvalidation;
 	},
@@ -141,7 +223,9 @@ module.exports = {
 			return {Error: "No 'order_info' object"};
 		}
 
-		return "Hello in returnCheck"
+		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
+		return orderAPIvalidation;
 	},
 
 
