@@ -136,7 +136,7 @@ module.exports = {
 
 
 	lookupCarrierCodes: function(code) {
-		var carrierExists = "fail";
+		var carrierExists = "Fail - Not a valid carrier moniker";
 		code = code.toUpperCase();
 
 		for (var carrier in carrierList) {
