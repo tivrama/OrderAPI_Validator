@@ -73,13 +73,70 @@ module.exports = {
 
 
 	checkAddress: function(address) {
+		var validatedAddress = {
+			street_1: undefined,
+			street_2: undefined,
+			city: undefined,
+			state: undefined,
+			zip: undefined,
+			country: undefined
+		};
 
+		for (var attribute in address) {
+			if (attribute === "street_1") {
+				validatedAddress.street_1 = this.checkNonEmptyString(address[attribute], true)
+			}
+			if (attribute === "street_2") {
+				validatedAddress.street_2 = this.checkNonEmptyString(address[attribute])
+			}
+			if (attribute === "city") {
+				validatedAddress.city = this.checkNonEmptyString(address[attribute], true)
+			}
+			if (attribute === "state") {
+				validatedAddress.state = this.checkNonEmptyString(address[attribute], true)
+			}
+			if (attribute === "zip") {
+				validatedAddress.zip = this.checkNonEmptyString(address[attribute], true)
+			}
+			if (attribute === "country") {
+				validatedAddress.country = this.checkNonEmptyString(address[attribute])
+			}
+		}
+
+		// Loop through validatedAddress and look for missed fields
+		for (var attribute in validatedAddress) {
+			if (validatedAddress[attribute] === undefined) {
+				switch(attribute) {
+				    case "street_1":
+				        validatedAddress.street_1 = "Fail - No 'street_1'"
+				        break;
+				    case "street_2":
+				        validatedAddress.street_2 = "Warning - No 'street_2'"
+				        break;
+				    case "city":
+				    	validatedAddress.city = "Fail - No 'city'"
+				    	break;
+				    case "state":
+				    	validatedAddress.state = "Fail - No 'state'"
+				    	break
+				    case "zip":
+				    	validatedAddress.zip = "Fail - No 'zip'"
+				    	break
+				    case "country":
+				    	validatedAddress.country = "Warning - No 'country'"
+				    	break
+				    default:
+				}
+			}
+		}
+
+		return validatedAddress;
 	},
 
 
 
 	lookupCarrierCodes: function(code) {
-		var carrierExists = "fail";
+		var carrierExists = "Fail - Not a valid carrier moniker";
 		code = code.toUpperCase();
 
 		for (var carrier in carrierList) {

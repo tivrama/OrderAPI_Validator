@@ -3,6 +3,22 @@ var helperFunctions = require('./helperfunctions');
 module.exports = {
 
 	matchShipmentsToItems: function(shipments, items) {
+		// Make sure the quantities match
+		// Check for duplicate tracking numbers 
+		// Check for duplicate SKUs or item_ids
+		var itemKeys = [];
+		var trackingNumberKeys = [];
+
+		// Look in first item and check for item_id and sku
+		// Look in first shipment and check for item_id and sku
+		// Default to matching item_id, secondary to matching sku
+		// Loop through items and check for suplicate primary match
+		// Loop through shipments and look for matching tracking numbers
+		// add up shipment quantities and see if they are less quantity than itmes
+		  // If less, warn "not all items shipped"
+		  // If same, "Pass"
+		  // If freater, "Fail"
+		
 
 	},
 
@@ -111,23 +127,198 @@ module.exports = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	checkShipmentsArray: function(shipmentsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
 		var shipmentsValidation = [];
 
 		var shipmentValidation = function (shipmentObj) {
-			var validatedShipment = {};
+
+			var validatedShipment = {
+				items_info: undefined,
+				carrier: undefined,
+				shipped_to: undefined,
+				ship_date: undefined,
+				tracking_number: undefined,
+			};
+
 			for (var attribute in shipmentObj) {
-				// TODO
+
+				if (attribute === "items_info") {
+					if (Array.isArray(shipmentObj[attribute])) {
+						if (shipmentObj[attribute].length > 0) {
+							var validatedItemsInfo = [];
+							for (var i = 0; i < shipmentObj[attribute].length; i++) {
+								validatedItemsInfo.push(itemsValidation(shipmentObj[attribute][i]));
+							}
+							validatedShipment.items_info = validatedItemsInfo;
+						} else {
+							validatedShipment.items_info = "Fail - 'items_info' array should contain info about items"
+						}
+					} else {
+						validatedShipment.items_info = "Fail - 'items_info' should be an array"
+					}
+				}
+
+				if (attribute === "carrier") {
+					validatedShipment.carrier = helperFunctions.lookupCarrierCodes(shipmentObj[attribute]);
+				}
+				if (attribute === "shipped_to") {
+
+					validatedShipment.shipped_to = {};
+					var shippedTo = shipmentObj[attribute];
+
+					for (var STattribute in shippedTo) {
+						if (STattribute === "first_name") {
+							validatedShipment.shipped_to.first_name = helperFunctions.checkNonEmptyString(shippedTo[STattribute], true);
+						}
+						if (STattribute === "last_name") {
+							validatedShipment.shipped_to.last_name = helperFunctions.checkNonEmptyString(shippedTo[STattribute], true);
+						}	
+						if (STattribute === "phone") {
+							validatedShipment.shipped_to.phone = helperFunctions.checkNonEmptyString(shippedTo[STattribute], true);
+						}
+						if (STattribute === "email") {
+							validatedShipment.shipped_to.email = helperFunctions.checkValidEmail(shippedTo[STattribute], true);
+						}
+						if (STattribute === "address") {
+							validatedShipment.shipped_to.address = helperFunctions.checkAddress(shippedTo[STattribute], true);
+						}
+					}
+
+					for (var STattribute in validatedShipment.shipped_to) {
+						if (validatedShipment.shipped_to[STattribute] === undefined) {
+							switch(attribute) {
+							    case "first_name":
+							        validatedShipment.shipped_to.first_name = "Fail - No 'first_name'"
+							        break;
+							    case "last_name":
+							        validatedShipment.shipped_to.last_name = "Fail - No 'last_name'"
+							        break;
+							    case "phone":
+							    	validatedShipment.shipped_to.phone = "Fail - No 'phone'"
+							    	break;
+							    case "email":
+							    	validatedShipment.shipped_to.email = "Fail - No 'email'"
+							    	break
+							    case "address":
+							    	validatedShipment.shipped_to.address = "Fail - No 'address' object"
+							    	break
+							    default:
+							}
+						}
+					}
+				}
+				if (attribute === "ship_date") {
+					validatedShipment.ship_date = Date.parse(shipmentObj[attribute]) ? "Pass" : "Fail - Not a valid date"
+				}
+				if (attribute === "tracking_number") {
+					validatedShipment.tracking_number = helperFunctions.checkNonEmptyString(shipmentObj[attribute], true);
+				}
+
+				// Loop through validatedShipment and look for missed fields
+				for (var attribute in validatedShipment) {
+					if (validatedShipment[attribute] === undefined) {
+						switch(attribute) {
+						    case "items_info":
+						        validatedShipment.items_info = "Fail - No 'items_info' array"
+						        break;
+						    case "carrier":
+						        validatedShipment.carrier = "Fail - No 'carrier'"
+						        break;
+						    case "shipped_to":
+						    	validatedShipment.shipped_to = "Fail - No 'shipped_to' object"
+						    	break;
+						    case "ship_date":
+						    	validatedShipment.ship_date = "Fail - No 'ship_date'"
+						    	break
+						    case "tracking_number":
+						    	validatedShipment.tracking_number = "Fail - No 'tracking_number'"
+						    	break
+						    default:
+						}
+					}
+				}
+
+
 			}
 			return validatedShipment;
-		}
+		};
+
+		var itemsValidation = function(items) {
+			var validatedItem = {
+				quantity: undefined,
+				sku: undefined,
+				item_id: undefined
+			};
+
+			for (var attribute in items) {
+				if (attribute === "quantity") {
+					validatedItem.quantity = helperFunctions.checkValidNumber(items[attribute], true);
+				}
+				if (attribute === "sku") {
+					validatedItem.sku = helperFunctions.checkNonEmptyString(items[attribute]);
+				}
+				if (attribute === "item_id") {
+					validatedItem.item_id = helperFunctions.checkNonEmptyString(items[attribute]);
+				}
+			}
+			
+			if (validatedItem.sku === undefined) {
+				validatedItem.sku = "Warning - no value found";
+			}
+			if (validatedItem.sku[0] === "F" || validatedItem.sku[0] === "W") {
+				if (validatedItem.item_id === undefined) {
+					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
+					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
+				} else if (validatedItem.item_id[0] === "F" || validatedItem.item_id[0] === "W") {
+					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
+					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
+				}
+			}
+
+			return validatedItem;
+		};
+
 
 		for (var i = 0; i < shipmentsArray.length; i++) {
 			shipmentsValidation.push(shipmentValidation(shipmentsArray[i]))
 		}
+
 		return shipmentsValidation
 	},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -136,7 +327,7 @@ module.exports = {
 			return "Fail - 'billed_to' object is not found"
 		}
 
-		var validatedAddress = {
+		var validatedBilling = {
 			first_name: undefined,
 			last_name: undefined,
 			email: undefined,
@@ -146,47 +337,47 @@ module.exports = {
 		var billingObj = billing.billed_to;
 		for (var attribute in billingObj) {
 			if (attribute === "first_name") {
-				validatedAddress.first_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+				validatedBilling.first_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
 			}
 			if (attribute === "last_name") {
-				validatedAddress.last_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
+				validatedBilling.last_name = helperFunctions.checkNonEmptyString(billingObj[attribute], true);
 			}
 			if (attribute === "email") {
-				validatedAddress.email = helperFunctions.checkValidEmail(billingObj[attribute], true);
+				validatedBilling.email = helperFunctions.checkValidEmail(billingObj[attribute], true);
 			}
 			if (attribute === "address") {
-				validatedAddress.address = helperFunctions.checkAddress(billingObj[attribute], true);
+				validatedBilling.address = helperFunctions.checkAddress(billingObj[attribute], true);
 			}
 		}
 
-		// Loop through validatedAddress and look for missed fields
-		for (var attribute in validatedAddress) {
-			if (validatedAddress[attribute] === undefined) {
+		// Loop through validatedBilling and look for missed fields
+		for (var attribute in validatedBilling) {
+			if (validatedBilling[attribute] === undefined) {
 				switch(attribute) {
 				    case "first_name":
-				        validatedAddress.first_name = "Fail - No 'first_name'"
+				        validatedBilling.first_name = "Fail - No 'first_name'"
 				        break;
 				    case "last_name":
-				        validatedAddress.last_name = "Fail - No 'last_name'"
+				        validatedBilling.last_name = "Fail - No 'last_name'"
 				        break;
 				    case "email":
-				    	validatedAddress.email = "Fail - No 'email'"
+				    	validatedBilling.email = "Fail - No 'email'"
 				    	break;
 				    case "address":
-				    	validatedAddress.address = "Fail - No 'address'"
+				    	validatedBilling.address = "Fail - No 'address'"
 				    	break
 				    default:
 				}
 			}
 		}
 
-		return validatedAddress;
+		return validatedBilling;
 	},
 
 
 
 	checkCustomerObject: function(customer) {
-		var validatedAddress = {
+		var validatedCustomer = {
 			customer_id: undefined,
 			first_name: undefined,
 			last_name: undefined,
@@ -195,11 +386,51 @@ module.exports = {
 		};
 
 		for (var attribute in customer) {
-
+			if (attribute === "customer_id") {
+				validatedCustomer.customer_id = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "first_name") {
+				validatedCustomer.first_name = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "last_name") {
+				validatedCustomer.last_name = helperFunctions.checkNonEmptyString(customer[attribute], true);
+			}
+			if (attribute === "email") {
+				validatedCustomer.email = helperFunctions.checkValidEmail(customer[attribute], true);
+			}
+			if (attribute === "address") {
+				validatedCustomer.address = helperFunctions.checkAddress(customer[attribute], true);
+			}
 		}
 
-		return validatedAddress;
+		// Loop through validatedCustomer and look for missed fields
+		for (var attribute in validatedCustomer) {
+			if (validatedCustomer[attribute] === undefined) {
+				switch(attribute) {
+				    case "customer_id":
+				        validatedCustomer.customer_id = "Fail - No 'customer_id'"
+				        break;
+				    case "first_name":
+				        validatedCustomer.first_name = "Fail - No 'first_name'"
+				        break;
+				    case "last_name":
+				        validatedCustomer.last_name = "Fail - No 'last_name'"
+				        break;
+				    case "email":
+				    	validatedCustomer.email = "Fail - No 'email'"
+				    	break;
+				    case "address":
+				    	validatedCustomer.address = "Fail - No 'address'"
+				    	break
+				    default:
+				}
+			}
+		}
+
+		return validatedCustomer;
 	},
+
+
 
 
 	basicOrderAPICheck: function(json) {
@@ -296,6 +527,9 @@ module.exports = {
 		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
 		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
 
+		// TODO: Alert specific stuff like Signature Required
+
+
 		return orderAPIvalidation;
 	},
 
@@ -324,9 +558,9 @@ module.exports = {
 	shipCheck: function(json) {
 
 		var response = {
-			order_date: Date.parse(json.order_date) ? "pass" : "fail",
-			origin_zip: parseInt(json.origin_zip) ? "pass" : "fail",
-			dest_zip: parseInt(json.dest_zip) ? "pass" : "fail",
+			order_date: Date.parse(json.order_date) ? "Pass" : "Fail - Not a valid date",
+			origin_zip: parseInt(json.origin_zip) ? "Pass" : "Fail",
+			dest_zip: parseInt(json.dest_zip) ? "Pass" : "Fail",
 			carrier_code: json.carrier_code ? helperFunctions.lookupCarrierCodes(json.carrier_code) : "n/a",
 			unrecognized_attributes: []
 		}
