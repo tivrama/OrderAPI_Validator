@@ -6,16 +6,47 @@ module.exports = {
 
 		var itemVsShipments = {};
 
-		// Check for duplicate tracking numbers
-		var checkTrackingNumbers = []; 
+		// 1) check if items exist else return Fail
+		if (items !== undefined) {
+			if (items.length === 0) {
+				return itemVsShipments.items = "Fail - there must be at lease one item"
+			}
+		} else {
+			return itemVsShipments.items = "Fail - missing itms array.  There must be at lease one item"
+		}
+
+
+
+		// 2) check if shipments exist else return Warn
+		if (shipments !== undefined) {
+			if (shipments.length === 0) {
+				return itemVsShipments.shipments = "Warning - there is no shipments object.  It will have to be added with a Post or Put"
+			}
+		} else {
+			return itemVsShipments.shipments = "Warning - there is no shipments object.  It will have to be added with a Post or Put"
+		}
+
+
+		// 3) Check for duplicate tracking numbers
+		var checkTrackingNumbers = [];
+		var skuORitems_id = "sku";
 		for (var i = 0; i < shipments.length; i++) {
+
+			// check if the shipments items_info items use sku/items_id, or just sku
+			if (shipments[i].items_info[0].items_id !== undefined) {
+				if (shipments[i].items_info[0].items_id !== "")
+				skuORitems_id = "item_id";
+			}
+
 			if (checkTrackingNumbers.indexOf(shipments[i].tracking_number) > -1) {
 				itemVsShipments.tracking_number = "Fail - cannot have multiple shipments with the same tracking number"
 			}
 			checkTrackingNumbers.push(shipments[i].tracking_number)
 		}
 
-		// Check for duplicate SKUs or item_ids
+		
+
+		// 4) Check for duplicate SKUs or item_ids
 		var checkSkuNumbers = []; 
 		var matchItemAndSku = {};
 		var itemSkuUniqueItem = {};
@@ -25,10 +56,12 @@ module.exports = {
 			// Build an inventory of all unique items in the order along with their quantity
 			var tempSKU = items[i].sku.toString();
 			if (items[i].item_id !== undefined) {
-				var tempID = items[i].item_id;
-			} else {
-				var tempID = "";
-			}
+				if (skuORitems_id === "item_id") {
+					var tempID = items[i].item_id;
+				} else {
+					var tempID = "";	
+				}
+			} 
 			var uniqueItem = tempSKU + tempID;
 			if (itemSkuUniqueItem[uniqueItem] === undefined) {
 				itemSkuUniqueItem[uniqueItem] = items[i].quantity
@@ -36,7 +69,7 @@ module.exports = {
 				itemSkuUniqueItem[uniqueItem] += items[i].quantity;
 			}
 
-
+			// Check for duplicate sku/item_id numbers
 			if (checkSkuNumbers.indexOf(items[i].sku) > -1) {
 				// Look to see if item_id is there, if not fail
 				if (items[i].item_id === undefined) {
@@ -57,17 +90,30 @@ module.exports = {
 		}		
 
 
-		// Make sure the quantities match
-		
-		// Look in first item and check for item_id and sku
-		// Look in first shipment and check for item_id and sku
-		// Default to matching item_id, secondary to matching sku
-		// Loop through items and check for suplicate primary match
-		// Loop through shipments and look for matching tracking numbers
-		// add up shipment quantities and see if they are less quantity than itmes
-		  // If less, warn "not all items shipped"
-		  // If same, "Pass"
-		  // If freater, "Fail"
+		// 5) Loop through shipments and subract the items shipped from itemSkuUniqueItem
+		for (var i = 0; i < shipments.length; i++) {
+			for (var j = 0; j < shipments[i].items_info.length; j++) {
+				var tempSKU = shipments[i].items_info[j].sku.toString();
+				if (skuORitems_id === "item_id") {
+					var tempID = tempSKU + shipments[i].items_info[j].item_id;
+				}
+
+				itemSkuUniqueItem[tempSKU] -= shipments[i].items_info[j].quantity;
+			}
+		}
+
+
+		// 6) Make sure there are no negative quantities of items, and any postitive has a warning
+		for (var currentItem in itemSkuUniqueItem) {
+			if (itemSkuUniqueItem[currentItem] < 0) {
+				itemVsShipments[currentItem] = "Fail - cannot ship more " + currentItem + "than in order."
+			} else if (itemSkuUniqueItem[currentItem] > 0) {
+				itemVsShipments[currentItem] = "Warning - there are still " + itemSkuUniqueItem[currentItem] + " of " + currentItem + "left unshipped."
+			} else {
+				itemVsShipments[currentItem] = "Pass"
+			}
+		}
+
 		
 		  return itemVsShipments;
 	},
