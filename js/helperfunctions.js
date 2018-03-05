@@ -1,4 +1,5 @@
-var carrierList = require("../library/carriers.js").carrierList;
+var carrierList = require("../library/library").carrierList;
+var countryList = require("../library/library.js").countryList;
 
 module.exports = {
 
@@ -146,6 +147,19 @@ module.exports = {
 		}
 
 		return carrierExists;
+	},
+
+	lookupCountryCodes: function(code) {
+		var countryExists = "Fail - Not a valid country code";
+		code = code.toUpperCase();
+
+		for (var country in countryList) {
+			if (countryList[country] === code) {
+				countryExists = "Pass";
+			}
+		}
+
+		return countryExists;
 	}
 
 

@@ -6,6 +6,11 @@ module.exports = {
 		USPS: "USPS",
 		FEDEX: "FEDEX",
 		CANADAPOST: "CANADAPOST"
+	},
+
+	countryList: {
+		US: "US",
+		CA: "CA"
 	}
 
 

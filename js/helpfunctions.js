@@ -3,12 +3,62 @@ var helperFunctions = require('./helperfunctions');
 module.exports = {
 
 	matchShipmentsToItems: function(shipments, items) {
-		// Make sure the quantities match
-		// Check for duplicate tracking numbers 
-		// Check for duplicate SKUs or item_ids
-		var itemKeys = [];
-		var trackingNumberKeys = [];
 
+		var itemVsShipments = {};
+
+		// Check for duplicate tracking numbers
+		var checkTrackingNumbers = []; 
+		for (var i = 0; i < shipments.length; i++) {
+			if (checkTrackingNumbers.indexOf(shipments[i].tracking_number) > -1) {
+				itemVsShipments.tracking_number = "Fail - cannot have multiple shipments with the same tracking number"
+			}
+			checkTrackingNumbers.push(shipments[i].tracking_number)
+		}
+
+		// Check for duplicate SKUs or item_ids
+		var checkSkuNumbers = []; 
+		var matchItemAndSku = {};
+		var itemSkuUniqueItem = {};
+
+		for (var i = 0; i < items.length; i++) {
+
+			// Build an inventory of all unique items in the order along with their quantity
+			var tempSKU = items[i].sku.toString();
+			if (items[i].item_id !== undefined) {
+				var tempID = items[i].item_id;
+			} else {
+				var tempID = "";
+			}
+			var uniqueItem = tempSKU + tempID;
+			if (itemSkuUniqueItem[uniqueItem] === undefined) {
+				itemSkuUniqueItem[uniqueItem] = items[i].quantity
+			} else {
+				itemSkuUniqueItem[uniqueItem] += items[i].quantity;
+			}
+
+
+			if (checkSkuNumbers.indexOf(items[i].sku) > -1) {
+				// Look to see if item_id is there, if not fail
+				if (items[i].item_id === undefined) {
+					itemVsShipments.sku = "Fail - cannot have multiple items objects with the same SKU unless there is a different item_id"
+				} else {
+					var sku = items[i].sku
+					if (matchItemAndSku[sku] === items[i].item_id) {
+						// Look up the sku and see if it already has a matching item_id
+						itemVsShipments.sku = "Fail - cannot have multiple items objects with the same SKU and the same item_id"
+					}
+				}
+			}
+			checkSkuNumbers.push(items[i].sku)
+			if (items[i].item_id !== undefined) {
+				var sku = items[i].sku
+				matchItemAndSku[sku] = items[i].item_id
+			}
+		}		
+
+
+		// Make sure the quantities match
+		
 		// Look in first item and check for item_id and sku
 		// Look in first shipment and check for item_id and sku
 		// Default to matching item_id, secondary to matching sku
@@ -19,7 +69,7 @@ module.exports = {
 		  // If same, "Pass"
 		  // If freater, "Fail"
 		
-
+		  return itemVsShipments;
 	},
 
 
@@ -124,22 +174,6 @@ module.exports = {
 		}
 		return itemsValidation;
 	},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -272,7 +306,7 @@ module.exports = {
 					validatedItem.quantity = helperFunctions.checkValidNumber(items[attribute], true);
 				}
 				if (attribute === "sku") {
-					validatedItem.sku = helperFunctions.checkNonEmptyString(items[attribute]);
+					validatedItem.sku = helperFunctions.checkNonEmptyString(items[attribute], true);
 				}
 				if (attribute === "item_id") {
 					validatedItem.item_id = helperFunctions.checkNonEmptyString(items[attribute]);
@@ -280,16 +314,11 @@ module.exports = {
 			}
 			
 			if (validatedItem.sku === undefined) {
-				validatedItem.sku = "Warning - no value found";
+				validatedItem.sku = "Fail - no value found";
 			}
-			if (validatedItem.sku[0] === "F" || validatedItem.sku[0] === "W") {
-				if (validatedItem.item_id === undefined) {
-					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
-					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
-				} else if (validatedItem.item_id[0] === "F" || validatedItem.item_id[0] === "W") {
-					validatedItem.sku = "Fail - either 'sku' or 'item_id' must have a value";
-					validatedItem.item_id = "Fail - either 'sku' or 'item_id' must have a value";
-				}
+
+			if (validatedItem.quantity === undefined) {
+				validatedItem.quantity = "Fail - a quantity must be passed";
 			}
 
 			return validatedItem;
@@ -302,23 +331,6 @@ module.exports = {
 
 		return shipmentsValidation
 	},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -562,6 +574,9 @@ module.exports = {
 			origin_zip: parseInt(json.origin_zip) ? "Pass" : "Fail",
 			dest_zip: parseInt(json.dest_zip) ? "Pass" : "Fail",
 			carrier_code: json.carrier_code ? helperFunctions.lookupCarrierCodes(json.carrier_code) : "n/a",
+			origin_country: json.origin_country ? helperFunctions.lookupCountryCodes(json.origin_country) : "n/a",
+			dest_country: json.dest_country ? helperFunctions.lookupCountryCodes(json.dest_country) : "n/a",
+			category: typeof json.category === "string" ? "Pass" : "n/a",
 			unrecognized_attributes: []
 		}
 
