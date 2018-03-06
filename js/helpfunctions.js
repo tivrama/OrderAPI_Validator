@@ -106,9 +106,9 @@ module.exports = {
 		// 6) Make sure there are no negative quantities of items, and any postitive has a warning
 		for (var currentItem in itemSkuUniqueItem) {
 			if (itemSkuUniqueItem[currentItem] < 0) {
-				itemVsShipments[currentItem] = "Fail - cannot ship more " + currentItem + "than in order."
+				itemVsShipments[currentItem] = "Fail - cannot ship more " + currentItem + " than in order."
 			} else if (itemSkuUniqueItem[currentItem] > 0) {
-				itemVsShipments[currentItem] = "Warning - there are still " + itemSkuUniqueItem[currentItem] + " of " + currentItem + "left unshipped."
+				itemVsShipments[currentItem] = "Warning - there are still " + itemSkuUniqueItem[currentItem] + " of " + currentItem + " left unshipped."
 			} else {
 				itemVsShipments[currentItem] = "Pass"
 			}
