@@ -17,7 +17,11 @@ var OrderAPISchema = require('./models/json.js');
                 if (err) {
                     res.send(err);
                 }
-                res.send(retailerOrder);
+                if (retailerOrder.length > 1) {
+                    res.send(retailerOrder);
+                } else {
+                    res.send(retailerOrder[0]);
+                }
             });
         });
 
@@ -45,26 +49,75 @@ var OrderAPISchema = require('./models/json.js');
                 res.send("The payload is not a valid JSON");
             }
 
-            // Save json to MongoDB
-            var newEntry = new OrderAPISchema({
-                retailer : retailer,
-                order : req.body.order_info ? req.body.order_info.order_number : 1,
-                json : saveJSON
-            });
-
-            newEntry.save(function(err, resp) {
-                if (err) {
-                    res.send(err);
-                    console.log('Fail saving to server: ', err);
-                } else { 
-                    console.log('Success saving to server');
-
-                    // Call function to validate JSON (Apply product type(s))
-                    var validatedJSON = helper.validateJSON(req.body, product);
-                    
-                    // Send response
-                    res.send(validatedJSON);
+            // TODO: check if the order exists
+            // 1) check that there is an order number available
+            if (req.body.order_info !== undefined) {
+                if (req.body.order_info.order_number !== undefined) {
+                    var order = req.body.order_info.order_number
+                } else {
+                    var order = 1;
                 }
+            } else {
+                var order = 1;
+            }
+
+            // 2) Check the DB with the retailer and the order number
+            OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
+                if (err) {
+                    console.log("Error looking up the order in the DB: ", err);
+                }
+
+                // If it does, then update
+                if (retailerOrder.length < 1) {
+                    // Save json to MongoDB
+                    var newEntry = new OrderAPISchema({
+                        retailer : retailer,
+                        order : req.body.order_info ? req.body.order_info.order_number : 1,
+                        json : saveJSON
+                    });
+
+                    newEntry.save(function(err, resp) {
+                        if (err) {
+                            res.send(err);
+                            console.log('Fail saving to server: ', err);
+                        } else { 
+                            console.log('Success saving to server');
+
+                            // Call function to validate JSON (Apply product type(s))
+                            var validatedJSON = helper.validateJSON(req.body, product);
+                            
+                            // Send response
+                            res.send(validatedJSON);
+                        }
+                    });
+
+                // else save as new
+                } else {
+                    var originalPayload = retailerOrder[0];
+                    var query = { _id: originalPayload._id };
+                    var update = {
+                        retailer : retailer,
+                        order : req.body.order_info ? req.body.order_info.order_number : 1,
+                        json: saveJSON
+                    }
+
+                    OrderAPISchema.update(query, update, function (err, success) {
+                        if (err) {
+                            res.send(err);
+                            console.log('Fail updating to server: ', err);
+                        } else {
+                            console.log('Success updating to server');
+
+                            // Call function to validate JSON (Apply product type(s))
+                            var validatedJSON = helper.validateJSON(req.body, product);
+                            
+                            // Send response
+                            res.send(validatedJSON);
+                        }
+                    });
+
+                }
+                
             });
 
         });
