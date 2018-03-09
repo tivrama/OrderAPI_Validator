@@ -1,0 +1,24 @@
+{
+	"customer_preferences": {
+		"first_name": "Jon",
+		"last_name": "Jones",
+		"locale": "en_US",
+		"address": {
+			"street_1": "123 Somewhere Street",
+			"street_2": "apt # 6",
+			"city": "San Francisco",
+			"state": "CA",
+			"country": "USA",
+			"zip": "94123"
+		},
+		"notification_pref": [
+			"SMS"
+		],
+		"notification_pref_details": [
+{
+				"name": "SMS",
+				"value": "999-999-9999"
+			}
+		],
+	}
+}
