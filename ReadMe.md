@@ -1,18 +1,27 @@
 # OrderAPI_Validator
 
+TODO:
+- Warn unrecognized attributes in Order API
+- Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
+- Label
+- BOPIS
+- Notify
+
+
+
 ## API
 
-To check your payloads, post them in the body as raw application/JSON.  In the url, add your retailer moniker, and a comma seperated list of the products you are validating.  Order API payloads can be validated with the following products: alert, return, monitor.  Other poducts only accept on product.  For example, Ship API, will only accept "ship", and Label API will only accept "label".
+To check your payloads, post them in the body as raw application/JSON.  In the url, add your retailer moniker, and a comma seperated list of the products you are validating.  Order API payloads can be validated with the following products: alert, return, monitor.  Other poducts only accept one product.  For example, Ship API, will only accept "ship", and Label API will only accept "label".
 1) Post:
-- url: ```localhost:3001/api/validator?retailer=<retailer>&product=<comma seperated list of products>```
-- Example: ```http://localhost:3001/api/validator?retailer=peninsula&product=alert,return``` Note: some products take a different payload, like ship and label. 
+- url: ```https://api-validator.herokuapp.com/api/validator?retailer=<retailer>&product=<comma seperated list of products>```
+- Example: ```https://api-validator.herokuapp.com/api/validator?retailer=peninsula&product=alert,return``` Note: some products take a different payload, like ship and label. 
 - body: Payload for the product - *only send one at a time*
 - response body: Subdivided payload by product
 
 To get your payload back, (for example, to see what your OMS is posting), pass your retailer moniker, and order number.  For Order API posts, use the order number.  For all other products, pass "1".
 2) Get:
-- url (for non-order api, make "1" the order): ```localhost:3001/api/retriever?retailer=<retailer>&order=<order>```
-- Example: ```http://localhost:3001/api//api/retriever?retailer=peninsula&order=123456789```
+- url (for non-order api, make "1" the order): ```https://api-validator.herokuapp.com/api/retriever?retailer=<retailer>&order=<order>```
+- Example: ```https://api-validator.herokuapp.com/api/retriever?retailer=peninsula&order=123456789```
 - response body: The exact json payload from the Post
 
 ### List of Products
@@ -178,19 +187,7 @@ alert,return,monitor,ship,label
 
 ### Malformed JSON
 ```
-<pre>SyntaxError: Unexpected token : in JSON at position 43
-    <br> &nbsp; &nbsp;at JSON.parse (&lt;anonymous&gt;)
-    <br> &nbsp; &nbsp;at parse (/Users/joelschoolnik/Desktop/OrderAPI_Validator/node_modules/body-parser/lib/types/json.js:89:19)
-    <br> &nbsp; &nbsp;at /Users/joelschoolnik/Desktop/OrderAPI_Validator/node_modules/body-parser/lib/read.js:121:18
-    <br> &nbsp; &nbsp;at invokeCallback (/Users/joelschoolnik/Desktop/OrderAPI_Validator/node_modules/raw-body/index.js:224:16)
-    <br> &nbsp; &nbsp;at done (/Users/joelschoolnik/Desktop/OrderAPI_Validator/node_modules/raw-body/index.js:213:7)
-    <br> &nbsp; &nbsp;at IncomingMessage.onEnd (/Users/joelschoolnik/Desktop/OrderAPI_Validator/node_modules/raw-body/index.js:273:7)
-    <br> &nbsp; &nbsp;at emitNone (events.js:86:13)
-    <br> &nbsp; &nbsp;at IncomingMessage.emit (events.js:188:7)
-    <br> &nbsp; &nbsp;at endReadableNT (_stream_readable.js:975:12)
-    <br> &nbsp; &nbsp;at _combinedTickCallback (internal/process/next_tick.js:80:11)
-    <br> &nbsp; &nbsp;at process._tickCallback (internal/process/next_tick.js:104:9)
-</pre>
+<pre>Bad Request</pre>
 ```
 
 
