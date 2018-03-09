@@ -37,19 +37,6 @@ var OrderAPISchema = require('./models/json.js');
 
             var saveJSON = JSON.stringify(req.body);
 
-            if (/^[\],:{}\s]*$/.test(saveJSON.replace(/\\["\\\/bfnrtu]/g, '@').
-            replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-            replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
-
-                //the json is ok
-                console.log("The payload is a valid JSON");
-
-            } else {
-                //the json is not ok
-                res.send("The payload is not a valid JSON");
-            }
-
-            // TODO: check if the order exists
             // 1) check that there is an order number available
             if (req.body.order_info !== undefined) {
                 if (req.body.order_info.order_number !== undefined) {

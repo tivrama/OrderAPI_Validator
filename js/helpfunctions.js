@@ -106,9 +106,9 @@ module.exports = {
 		// 6) Make sure there are no negative quantities of items, and any postitive has a warning
 		for (var currentItem in itemSkuUniqueItem) {
 			if (itemSkuUniqueItem[currentItem] < 0) {
-				itemVsShipments[currentItem] = "Fail - cannot ship more " + currentItem + " than in order."
+				itemVsShipments[currentItem] = "Fail - cannot ship more " + currentItem + " than in order"
 			} else if (itemSkuUniqueItem[currentItem] > 0) {
-				itemVsShipments[currentItem] = "Warning - there are still " + itemSkuUniqueItem[currentItem] + " of " + currentItem + " left unshipped."
+				itemVsShipments[currentItem] = "Warning - there are still " + itemSkuUniqueItem[currentItem] + " of " + currentItem + " left unshipped"
 			} else {
 				itemVsShipments[currentItem] = "Pass"
 			}
@@ -585,8 +585,28 @@ module.exports = {
 		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
 		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
 
-		// TODO: Alert specific stuff like Signature Required
+		// Look for Signature Required
+		if (json.order_info.shipments !== undefined) {
 
+			for (var i = 0; i < json.order_info.shipments.length; i++) {
+
+				if (json.order_info.shipments[i].attributes !== undefined) {
+
+					if (json.order_info.shipments[i].attributes.signature_required !== undefined) {
+
+						var date = Date.parse(json.order_info.shipments[i].attributes.signature_required) ? "Pass" : "Fail - Not a valid date"
+						orderAPIvalidation.shipments[i].attributes = {signature_required: date}
+
+					} else {
+
+						orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required'"
+					}
+				} else {
+
+					orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required' in the 'attributes' obj"
+				}
+			}
+		}
 
 		return orderAPIvalidation;
 	},
@@ -606,9 +626,51 @@ module.exports = {
 
 
 
+	monitorCheck: function(json) {
+		// Check that json contais an object called order_info
+		if (!json.order_info) {
+			return {Error: "No 'order_info' object"};
+		}
+
+		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
+
+		// Look for item_promise_date in each item
+		for (var i = 0; i < json.order_info.order_items.length; i++) {
+
+			if (json.order_info.order_items[i].item_promise_date !== undefined) {
+
+				var date = Date.parse(json.order_info.order_items[i].item_promise_date) ? "Pass" : "Fail - Not a valid date"
+				orderAPIvalidation.order_items[i].item_promise_date = date
+
+			} else {
+
+				orderAPIvalidation.order_items[i].item_promise_date = "Fail - Must pass 'item_promise_date'"
+			}
+		}
+
+		return orderAPIvalidation;
+	},
+
+
+
 	labelCheck: function(json) {
 
 		return "Hello in labelCheck"
+	},
+
+
+
+	notifyCheck: function(json) {
+
+		return "Hello in notifyCheck"
+	},
+
+
+
+	bopisCheck: function(json) {
+
+		return "Hello in bopisCheck"
 	},
 
 
@@ -679,11 +741,27 @@ module.exports = {
 				productValidationArray.push(validatedReturnPayload);
 			}
 
+			if (productArray[j] === "monitor") {
+				var validatedMonitorPayload = this.monitorCheck(json);
+				productValidationArray.push(validatedMonitorPayload);
+			}
+
+			if (productArray[j] === "bopis") {
+				var validatedBopisPayload = this.bopisCheck(json);
+				productValidationArray.push(validatedBopisPayload);
+			}
+
 			if (productArray[j] === "label") { // 
 				var validatedLabelPayload = this.labelCheck(json);
 				productValidationArray.push(validatedLabelPayload);
 			}
 			
+			if (productArray[j] === "notify") { // 
+				var validatedNotifyPayload = this.notifyCheck(json);
+				productValidationArray.push(validatedNotifyPayload);
+			}
+
+
 		}
 
 		return productValidationArray.length > 1 ? productValidationArray : productValidationArray[0];
