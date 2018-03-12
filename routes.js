@@ -6,24 +6,26 @@ var OrderAPISchema = require('./models/json.js');
     module.exports = function(app) {
 
 
+//////////////////////////////////////////////
+// DB Is commented out until further notice //
+//////////////////////////////////////////////
+        // app.get('/api/retriever', function(req, res) {
+        //     console.log('INSIDE RETRIEVER!!!');
 
-        app.get('/api/retriever', function(req, res) {
-            console.log('INSIDE RETRIEVER!!!');
+        //     var retailer = req.query.retailer;
+        //     var order = req.query.order;
 
-            var retailer = req.query.retailer;
-            var order = req.query.order;
-
-            OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
-                if (err) {
-                    res.send(err);
-                }
-                if (retailerOrder.length > 1) {
-                    res.send(retailerOrder);
-                } else {
-                    res.send(retailerOrder[0]);
-                }
-            });
-        });
+        //     OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
+        //         if (err) {
+        //             res.send(err);
+        //         }
+        //         if (retailerOrder.length > 1) {
+        //             res.send(retailerOrder);
+        //         } else {
+        //             res.send(retailerOrder[0]);
+        //         }
+        //     });
+        // });
 
 
 
@@ -48,64 +50,75 @@ var OrderAPISchema = require('./models/json.js');
                 var order = 1;
             }
 
+
+            // Call function to validate JSON (Apply product type(s))
+            var validatedJSON = helper.validateJSON(req.body, product);
+            
+            // Send response
+            res.send(validatedJSON);
+
+
+//////////////////////////////////////////////
+// DB Is commented out until further notice //
+//////////////////////////////////////////////
             // 2) Check the DB with the retailer and the order number
-            OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
-                if (err) {
-                    console.log("Error looking up the order in the DB: ", err);
-                }
+            // OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
+            //     if (err) {
+            //         console.log("Error looking up the order in the DB: ", err);
+            //     }
 
-                // If it does, then update
-                if (retailerOrder.length < 1) {
-                    // Save json to MongoDB
-                    var newEntry = new OrderAPISchema({
-                        retailer : retailer,
-                        order : req.body.order_info ? req.body.order_info.order_number : 1,
-                        json : saveJSON
-                    });
+            //     // If it does, then update
+            //     if (retailerOrder.length < 1) {
+            //         // Save json to MongoDB
+            //         var newEntry = new OrderAPISchema({
+            //             retailer : retailer,
+            //             order : req.body.order_info ? req.body.order_info.order_number : 1,
+            //             json : saveJSON
+            //         });
 
-                    newEntry.save(function(err, resp) {
-                        if (err) {
-                            res.send(err);
-                            console.log('Fail saving to server: ', err);
-                        } else { 
-                            console.log('Success saving to server');
+            //         newEntry.save(function(err, resp) {
+            //             if (err) {
+            //                 res.send(err);
+            //                 console.log('Fail saving to server: ', err);
+            //             } else { 
+            //                 console.log('Success saving to server');
 
-                            // Call function to validate JSON (Apply product type(s))
-                            var validatedJSON = helper.validateJSON(req.body, product);
+            //                 // Call function to validate JSON (Apply product type(s))
+            //                 var validatedJSON = helper.validateJSON(req.body, product);
                             
-                            // Send response
-                            res.send(validatedJSON);
-                        }
-                    });
+            //                 // Send response
+            //                 res.send(validatedJSON);
+            //             }
+            //         });
 
-                // else save as new
-                } else {
-                    var originalPayload = retailerOrder[0];
-                    var query = { _id: originalPayload._id };
-                    var update = {
-                        retailer : retailer,
-                        order : req.body.order_info ? req.body.order_info.order_number : 1,
-                        json: saveJSON
-                    }
+            //     // else save as new
+            //     } else {
+            //         var originalPayload = retailerOrder[0];
+            //         var query = { _id: originalPayload._id };
+            //         var update = {
+            //             retailer : retailer,
+            //             order : req.body.order_info ? req.body.order_info.order_number : 1,
+            //             json: saveJSON
+            //         }
 
-                    OrderAPISchema.update(query, update, function (err, success) {
-                        if (err) {
-                            res.send(err);
-                            console.log('Fail updating to server: ', err);
-                        } else {
-                            console.log('Success updating to server');
+            //         OrderAPISchema.update(query, update, function (err, success) {
+            //             if (err) {
+            //                 res.send(err);
+            //                 console.log('Fail updating to server: ', err);
+            //             } else {
+            //                 console.log('Success updating to server');
 
-                            // Call function to validate JSON (Apply product type(s))
-                            var validatedJSON = helper.validateJSON(req.body, product);
+            //                 // Call function to validate JSON (Apply product type(s))
+            //                 var validatedJSON = helper.validateJSON(req.body, product);
                             
-                            // Send response
-                            res.send(validatedJSON);
-                        }
-                    });
+            //                 // Send response
+            //                 res.send(validatedJSON);
+            //             }
+            //         });
 
-                }
+            //     }
                 
-            });
+            // });
 
         });
 
