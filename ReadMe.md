@@ -1,12 +1,11 @@
 # OrderAPI_Validator
 
 TODO:
-- Warn unrecognized attributes in Order API
 - Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
 - Label
 - BOPIS
 - Notify
-
+- Warn unrecognized attributes in Order API
 
 
 ## API
@@ -18,6 +17,7 @@ To check your payloads, post them in the body as raw application/JSON.  In the u
 - body: Payload for the product - *only send one at a time*
 - response body: Subdivided payload by product
 
+*Note: Get functionality, and all saving to the DB has been removed until further notice*
 To get your payload back, (for example, to see what your OMS is posting), pass your retailer moniker, and order number.  For Order API posts, use the order number.  For all other products, pass "1".
 2) Get:
 - url (for non-order api, make "1" the order): ```https://api-validator.herokuapp.com/api/retriever?retailer=<retailer>&order=<order>```
