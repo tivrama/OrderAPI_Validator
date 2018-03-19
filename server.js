@@ -11,21 +11,33 @@ var mongoose       = require('mongoose');
 
 // set our port
 var port = process.env.PORT || 3001; 
-// config files
-var db = require('./config/db.js');
+
+
+
+
 
 //----------------------------
+//////////////////////////////////////////////
+// DB Is commented out until further notice //
+//////////////////////////////////////////////
+// config files
+// var db = require('./config/db.js');
+
 // connect to our mongoDB database 
 // (uncomment after establishing credentials in config/db.js)
 // mongoose.connect(db.url); 
 
-mongoose.connect(db.url, function (err, res) {
-  if (err) {
-    console.log ('ERROR connecting to: ' + db.url + '. ' + err);
-  } else {
-    console.log ('Succeeded connected to: ' + db.url);
-  }
-});
+// mongoose.connect(db.url, function (err, res) {
+//   if (err) {
+//     console.log ('ERROR connecting to: ' + db.url + '. ' + err);
+//   } else {
+//     console.log ('Succeeded connected to: ' + db.url);
+//   }
+// });
+
+
+
+
 
 
 //----------------------------

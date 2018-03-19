@@ -33,22 +33,9 @@ var OrderAPISchema = require('./models/json.js');
         // Call to get order info and return alerts type codes and names
         app.post('/api/validator', function(req, res) {
 
-            // Get retailer moniker out of the url param => retailer=gap
-            var retailer = req.query.retailer;
             var product = req.query.product ? req.query.product : "all";
 
             var saveJSON = JSON.stringify(req.body);
-
-            // 1) check that there is an order number available
-            if (req.body.order_info !== undefined) {
-                if (req.body.order_info.order_number !== undefined) {
-                    var order = req.body.order_info.order_number
-                } else {
-                    var order = 1;
-                }
-            } else {
-                var order = 1;
-            }
 
 
             // Call function to validate JSON (Apply product type(s))
@@ -58,9 +45,27 @@ var OrderAPISchema = require('./models/json.js');
             res.send(validatedJSON);
 
 
+
+
 //////////////////////////////////////////////
 // DB Is commented out until further notice //
 //////////////////////////////////////////////
+
+            // Get retailer moniker out of the url param => retailer=gap
+            // var retailer = req.query.retailer;
+
+            // 1) check that there is an order number available
+            // if (req.body.order_info !== undefined) {
+            //     if (req.body.order_info.order_number !== undefined) {
+            //         var order = req.body.order_info.order_number
+            //     } else {
+            //         var order = 1;
+            //     }
+            // } else {
+            //     var order = 1;
+            // }
+
+
             // 2) Check the DB with the retailer and the order number
             // OrderAPISchema.find({'order': order, 'retailer': retailer}, function(err, retailerOrder) {
             //     if (err) {
