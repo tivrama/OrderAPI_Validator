@@ -180,7 +180,7 @@ alert,return,monitor,ship,label
         }
     },
     "match_shipments_with_items": {
-        "99103060258": "Warning - there are still 1 of 99103060258left unshipped."
+        "99103060258": "Warning - there are still 1 of 99103060258 left unshipped."
     }
 }
 ```
@@ -191,3 +191,10 @@ alert,return,monitor,ship,label
 ```
 
 
+## TODO:
+1) Refine Shipment to Item Pairing in Order API for items which shipped too many times
+2) Put for Order API
+2) Label API
+3) Notify API
+4) BOPIS
+5) Track (Post) API
