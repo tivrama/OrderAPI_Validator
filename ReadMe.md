@@ -2,10 +2,10 @@
 
 TODO:
 - Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
-- Label
 - BOPIS
 - Notify
 - Warn unrecognized attributes in Order API
+- Label
 
 
 ## API
@@ -197,4 +197,3 @@ alert,return,monitor,ship,label
 2) Label API
 3) Notify API
 4) BOPIS
-5) Track (Post) API

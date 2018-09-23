@@ -5,12 +5,17 @@ module.exports = {
 		UPS: "UPS",
 		USPS: "USPS",
 		FEDEX: "FEDEX",
-		CANADAPOST: "CANADAPOST"
+		CANADAPOST: "CANADAPOST",
+		DHL: "DHL",
+		ONTRAC: "ONTRAC",
+		YODEL: "YODEL",
+		PUROLATOR: "PUROLATOR"
 	},
 
 	countryList: {
 		US: "US",
-		CA: "CA"
+		CA: "CA",
+		GB: "GB"
 	}
 
 

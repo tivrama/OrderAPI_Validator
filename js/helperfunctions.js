@@ -143,6 +143,7 @@ module.exports = {
 		for (var carrier in carrierList) {
 			if (carrierList[carrier] === code) {
 				carrierExists = "Pass";
+				return carrierExists;
 			}
 		}
 
@@ -156,6 +157,7 @@ module.exports = {
 		for (var country in countryList) {
 			if (countryList[country] === code) {
 				countryExists = "Pass";
+				return countryExists;
 			}
 		}
 
