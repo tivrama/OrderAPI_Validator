@@ -1,7 +1,7 @@
 var path = require('path');
 var request = require('request');
 var helper = require('./js/helpfunctions.js');
-var OrderAPISchema = require('./models/json.js');
+// var OrderAPISchema = require('./models/json.js');
 
     module.exports = function(app) {
 
