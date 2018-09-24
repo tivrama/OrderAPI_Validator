@@ -4,10 +4,9 @@ TODO:
 - Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
 - BOPIS
 - Notify
-- Order API Put
- # Add Shipping Details
- # Update Items
- # Update Shipping and Items for Multi-Ship Track
+- Order API: Add Shipping Details
+- Order API: Update Items
+- Order API: Update Shipping and Items for Multi-Ship Track
 - Warn unrecognized attributes in Order API
 - Label
 
