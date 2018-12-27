@@ -36,6 +36,30 @@ module.exports = {
 		}	
 	},
 
+	checkValidStringBoolean: function(stringBoolean) {
+
+		if (typeof(stringBoolean) === "string") {
+			stringBoolean = stringBoolean.toLowerCase();
+		}
+	    
+		switch (stringBoolean) {
+		    case true:
+		        return "Pass"
+		        break;
+		    case false:
+		        return "Pass"
+		        break;
+		    case "true":
+		    	return "Pass"
+		    	break;
+		    case "false":
+		    	return "Pass"
+		    	break;
+		    default:
+		}
+		    return "Warning - invalid boolean";
+	},
+
 
 
 	checkValidImage: function(image, required) {

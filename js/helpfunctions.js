@@ -2,6 +2,334 @@ var helperFunctions = require('./helperfunctions');
 
 module.exports = {
 
+
+	// 
+	validateJSON: function (json, product) {
+
+		var productValidationArray = [];
+
+		// product is a string of comma seperated values
+		// Loop through the string, split by comma and push the products into an array
+		var productArray = [];
+		var counter = 0;
+
+		for  (var i = 0; i < product.length; i++) {
+			if (product[i] === ",") {
+				var tempPrduct = product;
+				productArray.push(tempPrduct.slice(counter, i));
+				counter = i+1;
+			}
+		}
+		productArray.push(product.slice(counter, product.length))
+
+		for (var j = 0; j < productArray.length; j++) {
+
+			if (productArray[j] === "ship") { // EDD Checkout
+				var validatedShipPayload = this.shipCheck(json);
+				productValidationArray.push(validatedShipPayload);
+			}
+
+			if (productArray[j] === "alert") {
+				var validatedAlertPayload = this.alertCheck(json);
+				productValidationArray.push(validatedAlertPayload);
+			}
+
+			if (productArray[j] === "return") {
+				var validatedReturnPayload = this.returnCheck(json);
+				productValidationArray.push(validatedReturnPayload);
+			}
+
+			if (productArray[j] === "monitor") {
+				var validatedMonitorPayload = this.monitorCheck(json);
+				productValidationArray.push(validatedMonitorPayload);
+			}
+
+			if (productArray[j] === "label") { // TODO
+				var validatedLabelPayload = this.labelCheck(json);
+				productValidationArray.push(validatedLabelPayload);
+			}
+
+			if (productArray[j] === "bopis") { // TODO
+				var validatedBopisPayload = this.bopisCheck(json);
+				productValidationArray.push(validatedBopisPayload);
+			}
+
+			if (productArray[j] === "track") { // TODO
+				var validatedBopisPayload = this.trackCheck(json);
+				productValidationArray.push(validatedBopisPayload);
+			}
+			
+			if (productArray[j] === "notificationpref") { // TODO
+				var validatedNotifyPayload = this.notifyCheck(json);
+				productValidationArray.push(validatedNotifyPayload);
+			}
+
+		}
+
+		return productValidationArray.length > 1 ? productValidationArray : productValidationArray[0];
+	},
+
+
+
+
+
+
+
+	shipCheck: function(json) {
+
+		var response = {
+			order_date: Date.parse(json.order_date) ? "Pass" : "Fail - Not a valid date",
+			origin_zip: parseInt(json.origin_zip) ? "Pass" : "Fail",
+			dest_zip: parseInt(json.dest_zip) ? "Pass" : "Fail",
+			carrier_code: json.carrier_code ? helperFunctions.lookupCarrierCodes(json.carrier_code) : "n/a",
+			origin_country: json.origin_country ? helperFunctions.lookupCountryCodes(json.origin_country) : "n/a",
+			dest_country: json.dest_country ? helperFunctions.lookupCountryCodes(json.dest_country) : "n/a",
+			category: typeof json.category === "string" ? "Pass" : "n/a",
+			unrecognized_attributes: []
+		}
+
+		var temp = json;
+		for (var attribute in json) {
+			for (var schemaAttribute in response) {
+				if (attribute === schemaAttribute) {
+					delete temp[attribute]
+				}
+			}
+		}
+		
+		for (var tempAttribute in temp) {
+			response.unrecognized_attributes.push(tempAttribute);
+		}
+
+		return response;
+	},
+
+	alertCheck: function(json) {
+		// Check that json contais an object called order_info
+		if (!json.order_info) {
+			return {Error: "No 'order_info' object"};
+		}
+
+		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
+
+		// Look for Signature Required
+		if (json.order_info.shipments !== undefined) {
+
+			for (var i = 0; i < json.order_info.shipments.length; i++) {
+
+				if (json.order_info.shipments[i].attributes !== undefined) {
+
+					if (json.order_info.shipments[i].attributes.signature_required !== undefined) {
+
+						var date = Date.parse(json.order_info.shipments[i].attributes.signature_required) ? "Pass" : "Fail - Not a valid date"
+						orderAPIvalidation.shipments[i].attributes = {signature_required: date}
+
+					} else {
+
+						orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required'"
+					}
+				} else {
+
+					orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required' in the 'attributes' obj"
+				}
+			}
+		}
+
+		return orderAPIvalidation;
+	},
+
+	returnCheck: function(json) {
+		// Check that json contais an object called order_info
+		if (!json.order_info) {
+			return {Error: "No 'order_info' object"};
+		}
+
+		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
+		return orderAPIvalidation;
+	},
+
+	monitorCheck: function(json) {
+		// Check that json contais an object called order_info
+		if (!json.order_info) {
+			return {Error: "No 'order_info' object"};
+		}
+
+		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
+		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
+
+		// Look for item_promise_date in each item
+		for (var i = 0; i < json.order_info.order_items.length; i++) {
+
+			if (json.order_info.order_items[i].item_promise_date !== undefined) {
+
+				var date = Date.parse(json.order_info.order_items[i].item_promise_date) ? "Pass" : "Fail - Not a valid date"
+				orderAPIvalidation.order_items[i].item_promise_date = date
+
+			} else {
+
+				orderAPIvalidation.order_items[i].item_promise_date = "Fail - Must pass 'item_promise_date'"
+			}
+		}
+
+		return orderAPIvalidation;
+	},
+
+	labelCheck: function(json) {
+
+		var response = {
+				order_number: json.order_number ? helperFunctions.checkNonEmptyString(json.order_number, true) : "Fail - No 'order_number'",
+				billing_zip: json.billing_zip ? helperFunctions.checkNonEmptyString(json.billing_zip, true) : "Fail - No 'billing_zip",
+				rma_number: json.rma_number ? helperFunctions.checkNonEmptyString(json.rma_number, true) : "Note - if nothing is passed, Narvar will return 'RA'",
+				return_reference_number: json.return_reference_number ? helperFunctions.checkNonEmptyString(json.return_reference_number, true) : "Note - this value is used to retrieve previous posts",
+				order_items: []
+			}
+
+		if (json.send_email === null) {
+			response.send_email = "Warning - no confirmation email will be sent";
+		} else if (json.send_email !== undefined) {
+			response.send_email = helperFunctions.checkValidStringBoolean(json.send_email);
+		} else {
+			response.send_email = "Warning - no confirmation email will be sent";
+		}
+
+		var checkItemsInPayload = function (listOfOrderItems) {
+
+			var checkDupeSkus = []
+
+			for (var i = 0; i < listOfOrderItems.length; i++) {
+
+				var currentItem = {
+					sku: listOfOrderItems[i].sku ? helperFunctions.checkNonEmptyString(listOfOrderItems[i].sku, true) : "Fail - No 'sku'",
+					quantity: listOfOrderItems[i].quantity ? helperFunctions.checkValidNumber(listOfOrderItems[i].quantity, true) : "Fail - must have an integer",
+					return_reason: listOfOrderItems[i].return_reason ? helperFunctions.checkNonEmptyString(listOfOrderItems[i].return_reason, true) : "Warning - not return reason will be saved"
+				}
+
+				for (var j = 0; j < checkDupeSkus.length; j++) {					
+					if (checkDupeSkus[j] === listOfOrderItems[i].sku) {
+						currentItem.sku = "Fail - duplicate SKU: " + listOfOrderItems[i].sku
+					}
+				}
+				checkDupeSkus.push(listOfOrderItems[i].sku);
+				response.order_items.push(currentItem);
+			}
+		}
+
+		checkItemsInPayload(json.order_items);
+
+		return response;
+	},
+
+
+	bopisCheck: function(json) {
+
+		return "Hello in bopisCheck"
+	},
+
+	trackCheck: function(json) {
+
+		return "Hello in trackCheck"
+	},
+
+	notifyCheck: function(json) {
+
+		return "Hello in notifyCheck"
+	},
+
+
+
+
+
+
+
+
+
+
+
+	basicOrderAPICheck: function(json) {
+
+		var passFailCheckList = {
+			order_number: undefined,
+			order_date: undefined,
+			order_items: undefined,
+			shipments: undefined,
+			billing: undefined,
+			customer: undefined
+		};
+		// Look for parent level attributes validate
+		for (var attribute in json){
+			if (attribute === 'order_number') {
+				passFailCheckList.order_number = helperFunctions.checkNonEmptyString(json[attribute], true);
+			}
+
+			if (attribute === 'order_date') {
+				passFailCheckList.order_date = Date.parse(json[attribute]) ? "Pass" : "Fail - invalid date"
+			}
+
+			if (attribute === 'order_items') {
+				if (Array.isArray(json[attribute])) {
+					if (json[attribute].length > 0) {
+						// passFailCheckList.order_items = 
+						passFailCheckList.order_items = this.checkItemsArray(json[attribute]);
+					} else {
+						passFailCheckList.order_items = "Fail - Contains no items";
+					}
+				} else {
+					passFailCheckList.order_items = "Fail - Should be an array of item objects";
+				}
+			}
+
+			if (attribute === 'shipments') {
+				if (Array.isArray(json[attribute])) {
+					if (json[attribute].length > 0) {
+						passFailCheckList.shipments = this.checkShipmentsArray(json[attribute]);
+					} else {
+						passFailCheckList.shipments = "Warning - Contains no shipments";
+					}
+				} else {
+					passFailCheckList.shipments = "Fail - Should be an array of shipment objects";
+				}
+			}
+
+			if ( attribute === 'billing') {
+				passFailCheckList.billing = this.checkBillingObject(json[attribute]);
+			}
+
+			if ( attribute === 'customer') {
+				passFailCheckList.customer = this.checkCustomerObject(json[attribute]);
+			}
+		}
+
+		for (var parentAttributes in passFailCheckList) {
+			if (passFailCheckList[parentAttributes] === undefined) {
+
+				switch(parentAttributes) {
+				    case "order_number":
+				        passFailCheckList.order_number = "FAIL - No 'order_number'"
+				        break;
+				    case "order_date":
+				        passFailCheckList.order_date = "Fail - No 'order_date'"
+				        break;
+				    case "order_items":
+				    	passFailCheckList.order_items = "Fail - No 'order_items'"
+				    	break;
+				    case "shipments":
+				    	passFailCheckList.shipments = "Warning - No 'shipments' object"
+				    	break
+				    case "billing":
+				    	passFailCheckList.billing = "Fail - No 'billing' object"
+				    	break
+				    case "customer":
+				    	passFailCheckList.customer = "Warning - No 'customer' object"
+				    	break
+				    default:
+				}
+			}
+		}
+		return passFailCheckList;
+	},
+
 	matchShipmentsToItems: function(shipments, items) {
 
 		var itemVsShipments = {};
@@ -486,285 +814,6 @@ module.exports = {
 		}
 
 		return validatedCustomer;
-	},
-
-
-
-
-	basicOrderAPICheck: function(json) {
-
-		var passFailCheckList = {
-			order_number: undefined,
-			order_date: undefined,
-			order_items: undefined,
-			shipments: undefined,
-			billing: undefined,
-			customer: undefined
-		};
-		// Look for parent level attributes validate
-		for (var attribute in json){
-			if (attribute === 'order_number') {
-				passFailCheckList.order_number = helperFunctions.checkNonEmptyString(json[attribute], true);
-			}
-
-			if (attribute === 'order_date') {
-				passFailCheckList.order_date = Date.parse(json[attribute]) ? "Pass" : "Fail - invalid date"
-			}
-
-			if (attribute === 'order_items') {
-				if (Array.isArray(json[attribute])) {
-					if (json[attribute].length > 0) {
-						// passFailCheckList.order_items = 
-						passFailCheckList.order_items = this.checkItemsArray(json[attribute]);
-					} else {
-						passFailCheckList.order_items = "Fail - Contains no items";
-					}
-				} else {
-					passFailCheckList.order_items = "Fail - Should be an array of item objects";
-				}
-			}
-
-			if (attribute === 'shipments') {
-				if (Array.isArray(json[attribute])) {
-					if (json[attribute].length > 0) {
-						passFailCheckList.shipments = this.checkShipmentsArray(json[attribute]);
-					} else {
-						passFailCheckList.shipments = "Warning - Contains no shipments";
-					}
-				} else {
-					passFailCheckList.shipments = "Fail - Should be an array of shipment objects";
-				}
-			}
-
-			if ( attribute === 'billing') {
-				passFailCheckList.billing = this.checkBillingObject(json[attribute]);
-			}
-
-			if ( attribute === 'customer') {
-				passFailCheckList.customer = this.checkCustomerObject(json[attribute]);
-			}
-		}
-
-		for (var parentAttributes in passFailCheckList) {
-			if (passFailCheckList[parentAttributes] === undefined) {
-
-				switch(parentAttributes) {
-				    case "order_number":
-				        passFailCheckList.order_number = "FAIL - No 'order_number'"
-				        break;
-				    case "order_date":
-				        passFailCheckList.order_date = "Fail - No 'order_date'"
-				        break;
-				    case "order_items":
-				    	passFailCheckList.order_items = "Fail - No 'order_items'"
-				    	break;
-				    case "shipments":
-				    	passFailCheckList.shipments = "Warning - No 'shipments' object"
-				    	break
-				    case "billing":
-				    	passFailCheckList.billing = "Fail - No 'billing' object"
-				    	break
-				    case "customer":
-				    	passFailCheckList.customer = "Warning - No 'customer' object"
-				    	break
-				    default:
-				}
-			}
-		}
-		return passFailCheckList;
-	},
-
-
-
-	alertCheck: function(json) {
-		// Check that json contais an object called order_info
-		if (!json.order_info) {
-			return {Error: "No 'order_info' object"};
-		}
-
-		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
-		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
-
-		// Look for Signature Required
-		if (json.order_info.shipments !== undefined) {
-
-			for (var i = 0; i < json.order_info.shipments.length; i++) {
-
-				if (json.order_info.shipments[i].attributes !== undefined) {
-
-					if (json.order_info.shipments[i].attributes.signature_required !== undefined) {
-
-						var date = Date.parse(json.order_info.shipments[i].attributes.signature_required) ? "Pass" : "Fail - Not a valid date"
-						orderAPIvalidation.shipments[i].attributes = {signature_required: date}
-
-					} else {
-
-						orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required'"
-					}
-				} else {
-
-					orderAPIvalidation.shipments[i].attributes = "Warning - If using Signature Required notification, must pass a date in 'signature_required' in the 'attributes' obj"
-				}
-			}
-		}
-
-		return orderAPIvalidation;
-	},
-
-
-
-	returnCheck: function(json) {
-		// Check that json contais an object called order_info
-		if (!json.order_info) {
-			return {Error: "No 'order_info' object"};
-		}
-
-		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
-		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
-		return orderAPIvalidation;
-	},
-
-
-
-	monitorCheck: function(json) {
-		// Check that json contais an object called order_info
-		if (!json.order_info) {
-			return {Error: "No 'order_info' object"};
-		}
-
-		var orderAPIvalidation = this.basicOrderAPICheck(json.order_info);
-		orderAPIvalidation.match_shipments_with_items = this.matchShipmentsToItems(json.order_info.shipments, json.order_info.order_items);
-
-		// Look for item_promise_date in each item
-		for (var i = 0; i < json.order_info.order_items.length; i++) {
-
-			if (json.order_info.order_items[i].item_promise_date !== undefined) {
-
-				var date = Date.parse(json.order_info.order_items[i].item_promise_date) ? "Pass" : "Fail - Not a valid date"
-				orderAPIvalidation.order_items[i].item_promise_date = date
-
-			} else {
-
-				orderAPIvalidation.order_items[i].item_promise_date = "Fail - Must pass 'item_promise_date'"
-			}
-		}
-
-		return orderAPIvalidation;
-	},
-
-
-
-	labelCheck: function(json) {
-
-		return "Hello in labelCheck"
-	},
-
-
-
-	notifyCheck: function(json) {
-
-		return "Hello in notifyCheck"
-	},
-
-
-
-	bopisCheck: function(json) {
-
-		return "Hello in bopisCheck"
-	},
-
-
-
-	shipCheck: function(json) {
-
-		var response = {
-			order_date: Date.parse(json.order_date) ? "Pass" : "Fail - Not a valid date",
-			origin_zip: parseInt(json.origin_zip) ? "Pass" : "Fail",
-			dest_zip: parseInt(json.dest_zip) ? "Pass" : "Fail",
-			carrier_code: json.carrier_code ? helperFunctions.lookupCarrierCodes(json.carrier_code) : "n/a",
-			origin_country: json.origin_country ? helperFunctions.lookupCountryCodes(json.origin_country) : "n/a",
-			dest_country: json.dest_country ? helperFunctions.lookupCountryCodes(json.dest_country) : "n/a",
-			category: typeof json.category === "string" ? "Pass" : "n/a",
-			unrecognized_attributes: []
-		}
-
-		var temp = json;
-		for (var attribute in json) {
-			for (var schemaAttribute in response) {
-				if (attribute === schemaAttribute) {
-					delete temp[attribute]
-				}
-			}
-		}
-		
-		for (var tempAttribute in temp) {
-			response.unrecognized_attributes.push(tempAttribute);
-		}
-
-		return response;
-	},
-
-
-
-	validateJSON: function (json, product) {
-
-		var productValidationArray = [];
-
-		// product is a string of comma seperated values
-		// Loop through the string, split by comma and push the products into an array
-		var productArray = [];
-		var counter = 0;
-
-		for  (var i = 0; i < product.length; i++) {
-			if (product[i] === ",") {
-				var tempPrduct = product;
-				productArray.push(tempPrduct.slice(counter, i));
-				counter = i+1;
-			}
-		}
-		productArray.push(product.slice(counter, product.length))
-
-		for (var j = 0; j < productArray.length; j++) {
-
-			if (productArray[j] === "ship") { // EDD Checkout
-				var validatedShipPayload = this.shipCheck(json);
-				productValidationArray.push(validatedShipPayload);
-			}
-
-			if (productArray[j] === "alert") {
-				var validatedAlertPayload = this.alertCheck(json);
-				productValidationArray.push(validatedAlertPayload);
-			}
-
-			if (productArray[j] === "return") {
-				var validatedReturnPayload = this.returnCheck(json);
-				productValidationArray.push(validatedReturnPayload);
-			}
-
-			if (productArray[j] === "monitor") {
-				var validatedMonitorPayload = this.monitorCheck(json);
-				productValidationArray.push(validatedMonitorPayload);
-			}
-
-			if (productArray[j] === "bopis") {
-				var validatedBopisPayload = this.bopisCheck(json);
-				productValidationArray.push(validatedBopisPayload);
-			}
-
-			if (productArray[j] === "label") { // 
-				var validatedLabelPayload = this.labelCheck(json);
-				productValidationArray.push(validatedLabelPayload);
-			}
-			
-			if (productArray[j] === "notify") { // 
-				var validatedNotifyPayload = this.notifyCheck(json);
-				productValidationArray.push(validatedNotifyPayload);
-			}
-
-
-		}
-
-		return productValidationArray.length > 1 ? productValidationArray : productValidationArray[0];
 	}
 
 };
