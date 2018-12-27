@@ -36,7 +36,7 @@ module.exports = {
 		}	
 	},
 
-	checkValidStringBoolean: function(stringBoolean) {
+	checkValidStringBoolean: function(stringBoolean, required) {
 
 		if (typeof(stringBoolean) === "string") {
 			stringBoolean = stringBoolean.toLowerCase();
@@ -57,7 +57,12 @@ module.exports = {
 		    	break;
 		    default:
 		}
-		    return "Warning - invalid boolean";
+
+		if (required) {
+			return "Fail - invalid boolean"
+		} else {
+			return "Warning - invalid boolean";
+		}
 	},
 
 
@@ -93,6 +98,10 @@ module.exports = {
 		} else {
 			return required ? "Fail - invalid email" : "Fail - no value found"
 		}
+	},
+
+	checkValidPhone: function(phone) {
+		return phone.match(/\d/g).length===10
 	},
 
 

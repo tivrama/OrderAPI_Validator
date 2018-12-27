@@ -14,7 +14,16 @@
         </header>
 
         <p>Welcome to the API Validator.  Submit your post body to check for required fields and correct schemas.  You will get a reponse json which will point out any errors, missing or malformed data, and notes</p>
-        <p>Use this for the following products: [return, alert, monitor, track, ship, notificationpref, label]</p>
+        <p>Use this for the following products: [
+        return,
+        alert,
+        monitor,
+        track,
+        ship,
+        notificationpref_customer,
+        notificationpref_order,
+        label
+        ]</p>
         <p>Get a validation of a JSON payload:</p>
         <p>POST: https://api-validator.herokuapp.com/api/validator?product=<Product_Name></p>
         <p>Example1: https://api-validator.herokuapp.com/api/validator?product=return</p>

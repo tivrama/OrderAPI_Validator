@@ -35,7 +35,7 @@ var mainScripts = require('./js/scripts.js');
 
             var product = req.query.product ? req.query.product : "all";
 
-            var saveJSON = JSON.stringify(req.body);
+            // var saveJSON = JSON.stringify(req.body);
 
 
             // Call function to validate JSON (Apply product type(s))

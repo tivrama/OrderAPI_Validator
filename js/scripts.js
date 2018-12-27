@@ -1,4 +1,7 @@
 var helperFunctions = require('./helperfunctions');
+var notificationCenterTrafficSource = require("../library/library.js").notificationCenterTrafficSource;
+var locales = require("../library/library.js").locales
+
 
 module.exports = {
 
@@ -59,13 +62,18 @@ module.exports = {
 				productValidationArray.push(validatedBopisPayload);
 			}
 			
-			if (productArray[j] === "notificationpref") { // TODO
-				var validatedNotifyPayload = this.notifyCheck(json);
-				productValidationArray.push(validatedNotifyPayload);
+			if (productArray[j] === "notificationpref_customer") { // TODO
+				var validatedNotifyCustomerPayload = this.notifyCustomerCheck(json);
+				productValidationArray.push(validatedNotifyCustomerPayload);
+			}
+
+			if (productArray[j] === "notificationpref_order") { // TODO
+				var validatedNotifyOrderPayload = this.notifyOrderCheck(json);
+				productValidationArray.push(validatedNotifyOrderPayload);
 			}
 
 		}
-
+			
 		return productValidationArray.length > 1 ? productValidationArray : productValidationArray[0];
 	},
 
@@ -232,16 +240,146 @@ module.exports = {
 		return "Hello in trackCheck"
 	},
 
-	notifyCheck: function(json) {
+	notifyCustomerCheck: function(json) {
+		// Check that json contains an object called customer_preferences
+		if (!json.customer_preferences) {
+			return {Error: "No 'customer_preferences' object"};
+		}
+		var response = this.basicNotificationCenterCheck(json.customer_preferences);
 
-		return "Hello in notifyCheck"
+		return response;
+	},
+
+	notifyOrderCheck: function(json) {
+		// Check that json contains an object called order_preferences
+		if (!json.order_preferences) {
+			return {Error: "No 'order_preferences' object"};
+		}
+
+		var response = this.basicNotificationCenterCheck(json.order_preferences);
+
+		if (json.order_preferences.order_id) {
+			response.order_id =  helperFunctions.checkNonEmptyString(json.order_preferences.order_id, true);
+		} else {
+			response.order_id = "Fail - must have order_id"
+		}
+
+		if (json.order_preferences.is_guest) {
+			response.is_guest =  helperFunctions.checkValidStringBoolean(json.order_preferences.is_guest, true);
+		} else {
+			response.order_id = "Fail - must have is_guest"
+		}
+
+		if (json.order_preferences.is_active) {
+			response.is_active =  helperFunctions.checkValidStringBoolean(json.order_preferences.is_active, true);
+		} else {
+			response.order_id = "Fail - must have is_active"
+		}
+
+		return response;
 	},
 
 
 
 
 
+	basicNotificationCenterCheck: function(json) {
+		var passFailChecklist = {
+			traffic_source: undefined,
+			first_name: undefined,
+			last_name: undefined,
+			notification_pref_details: undefined,
+			locale: undefined
+		};
 
+		for (var attribute in json) {
+
+			if (attribute === 'traffic_source') {
+
+				if (notificationCenterTrafficSource.indexOf(json[attribute]) > -1) {
+					passFailChecklist.traffic_source = "Pass";
+				} else {
+					passFailChecklist.traffic_source = "Fail - value must be one of the following: 'MY_ACCOUNT_PAGE','ORDER_CONFIRMATION_PAGE','ORDER_CHECKOUT_PAGE'";
+				}
+			}
+
+			if (attribute === 'first_name') {
+				passFailChecklist.first_name = helperFunctions.checkNonEmptyString(json[attribute]);
+			}
+			if (attribute === 'last_name') {
+				passFailChecklist.last_name = helperFunctions.checkNonEmptyString(json[attribute]);
+			}
+
+			if (attribute === 'locale') {
+				if (locales.indexOf(json[attribute]) > -1) {
+					passFailChecklist.locale = "Pass";
+				} else {
+					passFailChecklist.locale = "Fail - must have a valid locale code";
+				}
+			}
+		}
+
+		
+		if (json.notification_pref_details === undefined) { return }
+
+		if (!Array.isArray(json.notification_pref_details)) { 
+			return passFailChecklist.notification_pref_details = "Fail, must be an array"
+		}
+
+		passFailChecklist.notification_pref_details = [];
+
+		for (var i = 0; i < json.notification_pref_details.length; i++) {
+
+			var contactDetails = {
+				channel: undefined,
+				contact: undefined
+			}
+
+			if (json.notification_pref_details[i].channel === undefined) {
+				contactDetails.channel = "Fail - must have the channel set to SMS"
+			} else if (json.notification_pref_details[i].channel !== "sms" ) {
+				contactDetails.channel = "Fail - must have the channel set to SMS"
+			} else {
+				contactDetails.channel = "Pass"
+			}
+
+			if (json.notification_pref_details[i].contact === undefined) {
+				contactDetails.contact = "Fail - must have the contact, which has to be a real phone number"
+			} else if (!helperFunctions.checkValidPhone(json.notification_pref_details[i].contact)) {
+				contactDetails.contact = "Fail - must have the channel set to SMS"
+			} else {
+				contactDetails.contact = "Pass"
+			}
+
+			passFailChecklist.notification_pref_details.push(contactDetails)
+		}
+
+		for (var attribute in passFailChecklist) {
+			if (passFailChecklist[attribute] === undefined) {
+
+				switch (attribute) {
+				    case "traffic_source":
+				        passFailChecklist.traffic_source = "FAIL - No 'traffic_source'"
+				        break;
+				    case "first_name":
+				        passFailChecklist.first_name = "Fail - No 'first_name'"
+				        break;
+				    case "last_name":
+				    	passFailChecklist.last_name = "Fail - No 'last_name'"
+				    	break;
+				    case "notification_pref_details":
+				    	passFailChecklist.notification_pref_details = "Fail - No 'notification_pref_details' array"
+				    	break
+				    case "locale":
+				    	passFailChecklist.locale = "Fail - No 'locale'"
+				    	break
+				    default:
+				}
+			}
+		}
+
+		return passFailChecklist;
+	},
 
 
 

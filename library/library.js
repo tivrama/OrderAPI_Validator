@@ -1,5 +1,11 @@
 module.exports = {
 
+	locales: [
+		"en_US",
+		"en_CA",
+		"fr_CA",
+		"en_GB"
+	],
 
 	carrierList: {
 		UPS: "UPS",
@@ -17,7 +23,12 @@ module.exports = {
 		US: "US",
 		CA: "CA",
 		GB: "GB"
-	}
+	},
 
+	notificationCenterTrafficSource: [
+		"MY_ACCOUNT_PAGE",
+		"ORDER_CONFIRMATION_PAGE",
+		"ORDER_CHECKOUT_PAGE"
+	]
 
 };
