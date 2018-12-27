@@ -3,7 +3,7 @@ var helperFunctions = require('./helperfunctions');
 module.exports = {
 
 
-	// 
+	
 	validateJSON: function (json, product) {
 
 		var productValidationArray = [];
@@ -44,7 +44,7 @@ module.exports = {
 				productValidationArray.push(validatedMonitorPayload);
 			}
 
-			if (productArray[j] === "label") { // TODO
+			if (productArray[j] === "label") {
 				var validatedLabelPayload = this.labelCheck(json);
 				productValidationArray.push(validatedLabelPayload);
 			}
@@ -203,7 +203,7 @@ module.exports = {
 				var currentItem = {
 					sku: listOfOrderItems[i].sku ? helperFunctions.checkNonEmptyString(listOfOrderItems[i].sku, true) : "Fail - No 'sku'",
 					quantity: listOfOrderItems[i].quantity ? helperFunctions.checkValidNumber(listOfOrderItems[i].quantity, true) : "Fail - must have an integer",
-					return_reason: listOfOrderItems[i].return_reason ? helperFunctions.checkNonEmptyString(listOfOrderItems[i].return_reason, true) : "Warning - not return reason will be saved"
+					return_reason: listOfOrderItems[i].return_reason ? helperFunctions.checkNonEmptyString(listOfOrderItems[i].return_reason, true) : "Warning - no return reason will be saved"
 				}
 
 				for (var j = 0; j < checkDupeSkus.length; j++) {					

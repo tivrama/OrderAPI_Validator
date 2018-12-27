@@ -4,6 +4,6 @@
     "dest_zip" : "94303",
     "carrier_code": "UPS", // This field limits the results to the carrier
     "category": "monogrammed",  // This is optional
-    "Origin_country": "US",
-	"Dest_country": "CA"
+    "origin_country": "US",
+	"dest_country": "CA"
 }

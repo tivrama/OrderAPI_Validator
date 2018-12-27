@@ -1,6 +1,6 @@
 var path = require('path');
 var request = require('request');
-var helper = require('./js/helpfunctions.js');
+var mainScripts = require('./js/scripts.js');
 // var OrderAPISchema = require('./models/json.js');
 
     module.exports = function(app) {
@@ -39,7 +39,7 @@ var helper = require('./js/helpfunctions.js');
 
 
             // Call function to validate JSON (Apply product type(s))
-            var validatedJSON = helper.validateJSON(req.body, product);
+            var validatedJSON = mainScripts.validateJSON(req.body, product);
             
             // Send response
             res.send(validatedJSON);
@@ -89,7 +89,7 @@ var helper = require('./js/helpfunctions.js');
             //                 console.log('Success saving to server');
 
             //                 // Call function to validate JSON (Apply product type(s))
-            //                 var validatedJSON = helper.validateJSON(req.body, product);
+            //                 var validatedJSON = mainScripts.validateJSON(req.body, product);
                             
             //                 // Send response
             //                 res.send(validatedJSON);
@@ -114,7 +114,7 @@ var helper = require('./js/helpfunctions.js');
             //                 console.log('Success updating to server');
 
             //                 // Call function to validate JSON (Apply product type(s))
-            //                 var validatedJSON = helper.validateJSON(req.body, product);
+            //                 var validatedJSON = mainScripts.validateJSON(req.body, product);
                             
             //                 // Send response
             //                 res.send(validatedJSON);
