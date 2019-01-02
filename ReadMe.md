@@ -1,19 +1,22 @@
 # OrderAPI_Validator
 
-TODO:
-- Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
-- BOPIS
-- Notify
-- Order API: Add Shipping Details
-- Order API: Update Items
-- Order API: Update Shipping and Items for Multi-Ship Track
-- Warn unrecognized attributes in Order API
-- Label
-
-
 ## API
 
-To check your payloads, post them in the body as raw application/JSON.  In the url, add your retailer moniker, and a comma seperated list of the products you are validating.  Order API payloads can be validated with the following products: alert, return, monitor.  Other poducts only accept one product.  For example, Ship API, will only accept "ship", and Label API will only accept "label".
+To check your payloads, post them in the body as raw application/JSON.  In the url, add your retailer moniker, and a comma seperated list of the products you are validating.  Order API payloads can be validated with the following products: alert, return, monitor.  Other poducts only accept one product.  Ship API, for example, Ship API, will only accept "ship", and Label API will only accept "label".
+
+List of all accepable parameters:
+- ship
+- return
+- alert
+- monitor
+- track
+- bopis
+- notificationpref_customer_post
+- notificationpref_customer_put
+- notificationpref_order_post
+- notificationpref_order_put
+- label
+
 1) Post:
 - url: ```https://api-validator.herokuapp.com/api/validator?retailer=<retailer>&product=<comma seperated list of products>```
 - Example: ```https://api-validator.herokuapp.com/api/validator?retailer=peninsula&product=alert,return``` Note: some products take a different payload, like ship and label. 
@@ -28,7 +31,18 @@ To get your payload back, (for example, to see what your OMS is posting), pass y
 - response body: The exact json payload from the Post
 
 ### List of Products
-alert,return,monitor,ship,label
+List of all accepable parameters:
+- ship
+- return
+- alert
+- monitor
+- track
+- bopis
+- notificationpref_customer_post
+- notificationpref_customer_put
+- notificationpref_order_post
+- notificationpref_order_put
+- label
 
 ## Schema for Post Response
 
@@ -195,9 +209,12 @@ alert,return,monitor,ship,label
 
 
 ## TODO:
-1) Refine Shipment to Item Pairing in Order API for items which shipped too many times
-2) Put for Order API
-2) Label API
-3) Notify API
-4) BOPIS
-5) Track
+- Add to this page: https://narvar.atlassian.net/wiki/spaces/WS/pages/135758693/Order+API+Specifications
+- BOPIS
+- Track
+- Notify (Put and Get)
+- Order API (Refine Shipment to Item Pairing in Order API for items which shipped too many times)
+- Order API (Put)
+- Warn unrecognized attributes in Order API
+- Label
+

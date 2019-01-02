@@ -8,7 +8,7 @@ module.exports = {
 		if (typeof(string) === "string" && string !== "") {
 			return "Pass"
 		} else {
-			return required ? "Fail - invalid string" : "Warning - no value found"
+			return required ? "Fail - invalid string" : "Warning - no value found or not in String format"
 		}
 	},
 
@@ -22,7 +22,7 @@ module.exports = {
 				return "Cannot pass '0' or negative value"
 			}
 		} else {
-			return required ? "Fail - invalid number" : "Warning - no value found"
+			return required ? "Fail - invalid number" : "Warning - no value found or not in number format"
 		}	
 	},
 

@@ -62,13 +62,23 @@ module.exports = {
 				productValidationArray.push(validatedBopisPayload);
 			}
 			
-			if (productArray[j] === "notificationpref_customer") { // TODO
-				var validatedNotifyCustomerPayload = this.notifyCustomerCheck(json);
+			if (productArray[j] === "notificationpref_customer_post") {
+				var validatedNotifyCustomerPayload = this.notifyCustomerCheckPost(json);
 				productValidationArray.push(validatedNotifyCustomerPayload);
 			}
 
-			if (productArray[j] === "notificationpref_order") { // TODO
-				var validatedNotifyOrderPayload = this.notifyOrderCheck(json);
+			if (productArray[j] === "notificationpref_order_post") {
+				var validatedNotifyOrderPayload = this.notifyOrderCheckPost(json);
+				productValidationArray.push(validatedNotifyOrderPayload);
+			}
+
+			if (productArray[j] === "notificationpref_customer_put") {
+				var validatedNotifyCustomerPayload = this.notifyCustomerCheckPut(json);
+				productValidationArray.push(validatedNotifyCustomerPayload);
+			}
+
+			if (productArray[j] === "notificationpref_order_put") {
+				var validatedNotifyOrderPayload = this.notifyOrderCheckPut(json);
 				productValidationArray.push(validatedNotifyOrderPayload);
 			}
 
@@ -92,7 +102,8 @@ module.exports = {
 			carrier_code: json.carrier_code ? helperFunctions.lookupCarrierCodes(json.carrier_code) : "n/a",
 			origin_country: json.origin_country ? helperFunctions.lookupCountryCodes(json.origin_country) : "n/a",
 			dest_country: json.dest_country ? helperFunctions.lookupCountryCodes(json.dest_country) : "n/a",
-			category: typeof json.category === "string" ? "Pass" : "n/a",
+			category: json.category ? helperFunctions.checkNonEmptyString(json.category) : "n/a",
+			dc_id: json.dc_id ? helperFunctions.checkNonEmptyString(json.dc_id) : "n/a",
 			unrecognized_attributes: []
 		}
 
@@ -240,17 +251,23 @@ module.exports = {
 		return "Hello in trackCheck"
 	},
 
-	notifyCustomerCheck: function(json) {
+	notifyCustomerCheckPost: function(json) {
 		// Check that json contains an object called customer_preferences
 		if (!json.customer_preferences) {
 			return {Error: "No 'customer_preferences' object"};
 		}
 		var response = this.basicNotificationCenterCheck(json.customer_preferences);
 
+		if (json.customer_preferences.notification_pref_details === undefined || json.customer_preferences.notification_pref_details === null) {
+			// this is caught in basicNotificationCenterCheck
+		} else if (json.customer_preferences.notification_pref_details.length < 1) {
+			response.notification_pref_details = "Fail - the array must contain a preference object"
+		}
+
 		return response;
 	},
 
-	notifyOrderCheck: function(json) {
+	notifyOrderCheckPost: function(json) {
 		// Check that json contains an object called order_preferences
 		if (!json.order_preferences) {
 			return {Error: "No 'order_preferences' object"};
@@ -258,23 +275,65 @@ module.exports = {
 
 		var response = this.basicNotificationCenterCheck(json.order_preferences);
 
-		if (json.order_preferences.order_id) {
-			response.order_id =  helperFunctions.checkNonEmptyString(json.order_preferences.order_id, true);
-		} else {
-			response.order_id = "Fail - must have order_id"
+		response = this.basicNotifyOrderCheck(json.order_preferences, response)
+
+		if (json.order_preferences.notification_pref_details === undefined || json.order_preferences.notification_pref_details === null) {
+			// this is caught in basicNotificationCenterCheck
+			return response;
+		} else if (json.order_preferences.notification_pref_details.length < 1) {
+			response.notification_pref_details = "Fail - the array must contain a preference object"
 		}
 
-		if (json.order_preferences.is_guest) {
-			response.is_guest =  helperFunctions.checkValidStringBoolean(json.order_preferences.is_guest, true);
+		return response;
+	},
+
+	notifyCustomerCheckPut: function(json) {
+		if (!json.customer_preferences) {
+			return {Error: "No 'customer_preferences' object"};
+		}
+		var response = this.basicNotificationCenterCheck(json.customer_preferences);
+
+		if (json.customer_preferences.modified_datetime) {
+			response.modified_datetime =  Date.parse(json.customer_preferences.modified_datetime) ? "Pass" : "Fail - invalid date format"
 		} else {
-			response.order_id = "Fail - must have is_guest"
+			response.modified_datetime = "Fail - have a valid date.  Note, date must match value returned in a Get"
 		}
 
-		if (json.order_preferences.is_active) {
-			response.is_active =  helperFunctions.checkValidStringBoolean(json.order_preferences.is_active, true);
-		} else {
-			response.order_id = "Fail - must have is_active"
+		if (json.customer_preferences.notification_pref_details === undefined || json.customer_preferences.notification_pref_details === null) {
+			// this is caught in basicNotificationCenterCheck
+			return response;
+		} else if (json.customer_preferences.notification_pref_details.length < 1) {
+			response.notification_pref_details = "Pass - when passing an empty array, the customer is opted out"
 		}
+
+
+
+		return response;
+	},
+
+	notifyOrderCheckPut: function(json) {
+		// Check that json contains an object called order_preferences
+		if (!json.order_preferences) {
+			return {Error: "No 'order_preferences' object"};
+		}
+
+		var response = this.basicNotificationCenterCheck(json.order_preferences);
+
+		response = this.basicNotifyOrderCheck(json.order_preferences, response)
+
+		if (json.order_preferences.modified_datetime) {
+			response.modified_datetime =  Date.parse(json.order_preferences.modified_datetime) ? "Pass" : "Fail - invalid date format"
+		} else {
+			response.modified_datetime = "Fail - have a valid date.  Note, date must match value returned in a Get"
+		}
+
+		if (json.order_preferences.notification_pref_details === undefined || json.order_preferences.notification_pref_details === null) {
+			// this is caught in basicNotificationCenterCheck
+			return response;
+		} else if (json.order_preferences.notification_pref_details.length < 1) {
+			response.notification_pref_details = "Pass - when passing an empty array, the customer is opted out"
+		}
+
 
 		return response;
 	},
@@ -282,8 +341,8 @@ module.exports = {
 
 
 
-
 	basicNotificationCenterCheck: function(json) {
+
 		var passFailChecklist = {
 			traffic_source: undefined,
 			first_name: undefined,
@@ -320,39 +379,40 @@ module.exports = {
 		}
 
 		
-		if (json.notification_pref_details === undefined) { return }
+		if (json.notification_pref_details === undefined || json.notification_pref_details === null) { 
+			passFailChecklist.notification_pref_details = "Fail, must have notification_pref_details and be an array"
+		} else if (!Array.isArray(json.notification_pref_details)) { 
+			passFailChecklist.notification_pref_details = "Fail, must be an array"
+		} else { 
+			passFailChecklist.notification_pref_details = [];
 
-		if (!Array.isArray(json.notification_pref_details)) { 
-			return passFailChecklist.notification_pref_details = "Fail, must be an array"
+			for (var i = 0; i < json.notification_pref_details.length; i++) {
+
+				var contactDetails = {
+					channel: undefined,
+					contact: undefined
+				}
+
+				if (json.notification_pref_details[i].channel === undefined) {
+					contactDetails.channel = "Fail - must have the channel set to SMS"
+				} else if (json.notification_pref_details[i].channel !== "sms" ) {
+					contactDetails.channel = "Fail - must have the channel set to SMS"
+				} else {
+					contactDetails.channel = "Pass"
+				}
+
+				if (json.notification_pref_details[i].contact === undefined) {
+					contactDetails.contact = "Fail - must have the contact, which has to be a real phone number"
+				} else if (!helperFunctions.checkValidPhone(json.notification_pref_details[i].contact)) {
+					contactDetails.contact = "Fail - must have the channel set to SMS"
+				} else {
+					contactDetails.contact = "Pass"
+				}
+
+				passFailChecklist.notification_pref_details.push(contactDetails)
+			}
 		}
 
-		passFailChecklist.notification_pref_details = [];
-
-		for (var i = 0; i < json.notification_pref_details.length; i++) {
-
-			var contactDetails = {
-				channel: undefined,
-				contact: undefined
-			}
-
-			if (json.notification_pref_details[i].channel === undefined) {
-				contactDetails.channel = "Fail - must have the channel set to SMS"
-			} else if (json.notification_pref_details[i].channel !== "sms" ) {
-				contactDetails.channel = "Fail - must have the channel set to SMS"
-			} else {
-				contactDetails.channel = "Pass"
-			}
-
-			if (json.notification_pref_details[i].contact === undefined) {
-				contactDetails.contact = "Fail - must have the contact, which has to be a real phone number"
-			} else if (!helperFunctions.checkValidPhone(json.notification_pref_details[i].contact)) {
-				contactDetails.contact = "Fail - must have the channel set to SMS"
-			} else {
-				contactDetails.contact = "Pass"
-			}
-
-			passFailChecklist.notification_pref_details.push(contactDetails)
-		}
 
 		for (var attribute in passFailChecklist) {
 			if (passFailChecklist[attribute] === undefined) {
@@ -381,7 +441,29 @@ module.exports = {
 		return passFailChecklist;
 	},
 
+	basicNotifyOrderCheck: function(json, payload) {
 
+		if (json.order_id) {
+			payload.order_id =  helperFunctions.checkNonEmptyString(json.order_id, true);
+		} else {
+			payload.order_id = "Fail - must have 'order_id'"
+		}
+
+		if (json.is_guest) {
+			payload.is_guest =  helperFunctions.checkValidStringBoolean(json.is_guest, true);
+		} else {
+			payload.order_id = "Fail - must have 'is_guest'"
+		}
+
+		if (json.is_active) {
+			payload.is_active =  helperFunctions.checkValidStringBoolean(json.is_active, true);
+		} else {
+			payload.order_id = "Fail - must have 'is_active'"
+		}
+
+		return payload;
+
+	},
 
 
 
@@ -478,7 +560,7 @@ module.exports = {
 				return itemVsShipments.items = "Fail - there must be at lease one item"
 			}
 		} else {
-			return itemVsShipments.items = "Fail - missing itms array.  There must be at lease one item"
+			return itemVsShipments.items = "Fail - missing items array.  There must be at lease one item"
 		}
 
 
