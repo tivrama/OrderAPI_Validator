@@ -1,0 +1,14 @@
+{
+  "customer_preferences": {
+    "traffic_source": "MY_ACCOUNT_PAGE",
+    "first_name": "Buckaroo",
+    "last_name": "Banzai",
+    "notification_pref_details": [
+      {
+        "channel": "sms",
+        "contact": "MUST BE A REAL PHONE"
+      }
+    ],
+    "locale": "en_US"
+  }
+}

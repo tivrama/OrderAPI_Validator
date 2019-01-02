@@ -1,7 +1,7 @@
 var path = require('path');
 var request = require('request');
-var helper = require('./js/helpfunctions.js');
-var OrderAPISchema = require('./models/json.js');
+var mainScripts = require('./js/scripts.js');
+// var OrderAPISchema = require('./models/json.js');
 
     module.exports = function(app) {
 
@@ -35,11 +35,11 @@ var OrderAPISchema = require('./models/json.js');
 
             var product = req.query.product ? req.query.product : "all";
 
-            var saveJSON = JSON.stringify(req.body);
+            // var saveJSON = JSON.stringify(req.body);
 
 
             // Call function to validate JSON (Apply product type(s))
-            var validatedJSON = helper.validateJSON(req.body, product);
+            var validatedJSON = mainScripts.validateJSON(req.body, product);
             
             // Send response
             res.send(validatedJSON);
@@ -89,7 +89,7 @@ var OrderAPISchema = require('./models/json.js');
             //                 console.log('Success saving to server');
 
             //                 // Call function to validate JSON (Apply product type(s))
-            //                 var validatedJSON = helper.validateJSON(req.body, product);
+            //                 var validatedJSON = mainScripts.validateJSON(req.body, product);
                             
             //                 // Send response
             //                 res.send(validatedJSON);
@@ -114,7 +114,7 @@ var OrderAPISchema = require('./models/json.js');
             //                 console.log('Success updating to server');
 
             //                 // Call function to validate JSON (Apply product type(s))
-            //                 var validatedJSON = helper.validateJSON(req.body, product);
+            //                 var validatedJSON = mainScripts.validateJSON(req.body, product);
                             
             //                 // Send response
             //                 res.send(validatedJSON);
