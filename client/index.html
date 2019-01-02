@@ -14,12 +14,26 @@
         </header>
 
         <p>Welcome to the API Validator.  Submit your post body to check for required fields and correct schemas.  You will get a reponse json which will point out any errors, missing or malformed data, and notes</p>
-        <p>Use this for the following products: return, alert, monitor, ship</p>
+        <p>Use this for the following products:
+            <ul>
+                <li>return
+                <li>alert
+                <li>monitor
+                <li>track
+                <li>bopis
+                <li>ship
+                <li>notificationpref_customer_post
+                <li>notificationpref_customer_put
+                <li>notificationpref_order_post
+                <li>notificationpref_order_put
+                <li>label
+            </ul>
         <p>Get a validation of a JSON payload:</p>
         <p>POST: https://api-validator.herokuapp.com/api/validator?product=<Product_Name></p>
-        <p>Example: https://api-validator.herokuapp.com/api/validator?product=return</p>
-        <p>Check a JSON payload which was posted:
-       <!--  <p>GET: https://api-validator.herokuapp.com/api/retriever?retailer=<Retailer_Moniker>&amporder=<Order_Number> (For a Ship payload, pass a "1")</p>
+        <p>Example 1: https://api-validator.herokuapp.com/api/validator?product=return</p>
+        <p>Example 2: https://api-validator.herokuapp.com/api/validator?product=return,alert,monitor</p>
+        <!--  <p>Check a JSON payload which was posted:
+       <p>GET: https://api-validator.herokuapp.com/api/retriever?retailer=<Retailer_Moniker>&amporder=<Order_Number> (For a Ship payload, pass a "1")</p>
         <p>Example for OrderAPI: https://api-validator.herokuapp.com/api/retriever?retailer=peninsula&amporder=123456789</p>
         <p>Example for Ship: https://api-validator.herokuapp.com/api/retriever?retailer=peninsula&amporder=1</p> -->
 

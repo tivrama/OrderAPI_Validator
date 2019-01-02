@@ -1,0 +1,17 @@
+{
+  "order_preferences": {
+    "traffic_source": "MY_ACCOUNT_PAGE",
+    "order_id": "1234",
+    "first_name": "Bukaroo",
+    "last_name": "Banzai",
+    "notification_pref_details": [
+      {
+        "channel": "sms",
+        "contact": "MUST BE A REAL PHONE"
+      }
+    ],
+    "locale": "en_US",
+    "is_guest": true,
+    "is_active": "true"
+  }
+}

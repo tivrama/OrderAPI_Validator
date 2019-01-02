@@ -2,6 +2,9 @@
     "order_date": "2018-02-01T05:10:20Z",
     "origin_zip" : "01232",
     "dest_zip" : "94303",
-    "carrier_code": "UPS", // This field limits the results to the carrier\
-    "category": "monogrammed"  // This is optional
+    "carrier_code": "UPS", // This field limits the results to the carrier
+    "category": "monogrammed", // This is optional
+    "origin_country": "US",
+	"dest_country": "CA",
+	"dc_id": "DC01" // This is used if there are more than one DC in the same Zip
 }

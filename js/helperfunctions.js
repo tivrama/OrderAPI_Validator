@@ -8,7 +8,7 @@ module.exports = {
 		if (typeof(string) === "string" && string !== "") {
 			return "Pass"
 		} else {
-			return required ? "Fail - invalid string" : "Warning - no value found"
+			return required ? "Fail - invalid string" : "Warning - no value found or not in String format"
 		}
 	},
 
@@ -22,7 +22,7 @@ module.exports = {
 				return "Cannot pass '0' or negative value"
 			}
 		} else {
-			return required ? "Fail - invalid number" : "Warning - no value found"
+			return required ? "Fail - invalid number" : "Warning - no value found or not in number format"
 		}	
 	},
 
@@ -34,6 +34,35 @@ module.exports = {
 		} else {
 			return required ? "Fail - invalid boolean" : "Warning - no value found"
 		}	
+	},
+
+	checkValidStringBoolean: function(stringBoolean, required) {
+
+		if (typeof(stringBoolean) === "string") {
+			stringBoolean = stringBoolean.toLowerCase();
+		}
+	    
+		switch (stringBoolean) {
+		    case true:
+		        return "Pass"
+		        break;
+		    case false:
+		        return "Pass"
+		        break;
+		    case "true":
+		    	return "Pass"
+		    	break;
+		    case "false":
+		    	return "Pass"
+		    	break;
+		    default:
+		}
+
+		if (required) {
+			return "Fail - invalid boolean"
+		} else {
+			return "Warning - invalid boolean";
+		}
 	},
 
 
@@ -69,6 +98,10 @@ module.exports = {
 		} else {
 			return required ? "Fail - invalid email" : "Fail - no value found"
 		}
+	},
+
+	checkValidPhone: function(phone) {
+		return phone.match(/\d/g).length===10
 	},
 
 
@@ -143,6 +176,7 @@ module.exports = {
 		for (var carrier in carrierList) {
 			if (carrierList[carrier] === code) {
 				carrierExists = "Pass";
+				return carrierExists;
 			}
 		}
 
@@ -156,6 +190,7 @@ module.exports = {
 		for (var country in countryList) {
 			if (countryList[country] === code) {
 				countryExists = "Pass";
+				return countryExists;
 			}
 		}
 
