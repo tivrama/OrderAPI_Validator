@@ -1,6 +1,7 @@
 var path = require('path');
 var request = require('request');
 var mainScripts = require('./js/scripts.js');
+var bulkScripts = require('./js/bulkscripts.js');
 // var OrderAPISchema = require('./models/json.js');
 
     module.exports = function(app) {
@@ -124,6 +125,19 @@ var mainScripts = require('./js/scripts.js');
             //     }
                 
             // });
+
+        });
+
+        // Call to get order info and return alerts type codes and names
+        app.post('/api/bulkvalidator', function(req, res) {
+
+            var product = req.query.product ? req.query.product : "all";
+
+            // Call function to validate JSON (Apply product type(s))
+            var validatedJSON = bulkScripts.validateJSONs(req.body, product);
+            
+            // Send response
+            res.send(validatedJSON);
 
         });
 

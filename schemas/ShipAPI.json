@@ -6,5 +6,5 @@
     "category": "monogrammed", // This is optional
     "origin_country": "US",
 	"dest_country": "CA",
-	"dc_id": "DC01" // This is used if there are more than one DC in the same Zip
+	"dc_id": "DC01" // This is used if there are more than one DC in the same Zip (retailer_dc_id)
 }

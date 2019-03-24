@@ -80,7 +80,6 @@ List of all accepable parameters:
                 "email": "Pass",
                 "address": {
                     "street_1": "Pass",
-                    "street_2": "Pass",
                     "city": "Pass",
                     "state": "Pass",
                     "zip": "Pass",
@@ -97,7 +96,6 @@ List of all accepable parameters:
         "email": "Pass",
         "address": {
             "street_1": "Pass",
-            "street_2": "Pass",
             "city": "Pass",
             "state": "Pass",
             "zip": "Pass",
@@ -111,7 +109,6 @@ List of all accepable parameters:
         "email": "Pass",
         "address": {
             "street_1": "Pass",
-            "street_2": "Pass",
             "city": "Pass",
             "state": "Pass",
             "zip": "Pass",
@@ -158,7 +155,6 @@ List of all accepable parameters:
                 "email": "Fail - invalid email",
                 "address": {
                     "street_1": "Fail - invalid string",
-                    "street_2": "Fail - invalid string",
                     "city": "Fail - invalid string",
                     "state": "Fail - invalid string",
                     "zip": "Fail - invalid string",
@@ -175,7 +171,6 @@ List of all accepable parameters:
         "email": "Fail - invalid email",
         "address": {
             "street_1": "Fail - invalid string",
-            "street_2": "Pass",
             "city": "Fail - invalid string",
             "state": "Pass",
             "zip": "Pass",
@@ -189,7 +184,6 @@ List of all accepable parameters:
         "email": "Fail - invalid email",
         "address": {
             "street_1": "Pass",
-            "street_2": "Pass",
             "city": "Pass",
             "state": "Pass",
             "zip": "Pass",
@@ -217,4 +211,18 @@ List of all accepable parameters:
 - Order API (Put)
 - Warn unrecognized attributes in Order API
 - Label
+- Simple Returns
+- Other Attibutes
+  - SKU (required)
+  - Checkout Locale
+  - Fulfilment Status
+  - 
 
+
+!!!
+ - Make SKU a required field
+ - Add Checkout Locale
+ - Add Checkout Brand
+ - Add Notification Center API
+ - Bopis
+ - Track with Item Vis
