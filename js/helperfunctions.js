@@ -109,7 +109,6 @@ module.exports = {
 	checkAddress: function(address) {
 		var validatedAddress = {
 			street_1: undefined,
-			street_2: undefined,
 			city: undefined,
 			state: undefined,
 			zip: undefined,
@@ -119,9 +118,6 @@ module.exports = {
 		for (var attribute in address) {
 			if (attribute === "street_1") {
 				validatedAddress.street_1 = this.checkNonEmptyString(address[attribute], true)
-			}
-			if (attribute === "street_2") {
-				validatedAddress.street_2 = this.checkNonEmptyString(address[attribute])
 			}
 			if (attribute === "city") {
 				validatedAddress.city = this.checkNonEmptyString(address[attribute], true)
@@ -143,9 +139,6 @@ module.exports = {
 				switch(attribute) {
 				    case "street_1":
 				        validatedAddress.street_1 = "Fail - No 'street_1'"
-				        break;
-				    case "street_2":
-				        validatedAddress.street_2 = "Warning - No 'street_2'"
 				        break;
 				    case "city":
 				    	validatedAddress.city = "Fail - No 'city'"

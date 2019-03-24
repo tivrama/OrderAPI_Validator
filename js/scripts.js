@@ -340,7 +340,7 @@ module.exports = {
 
 
 
-
+	//// NOTIFICATION CENTER API SECTION ////
 	basicNotificationCenterCheck: function(json) {
 
 		var passFailChecklist = {
@@ -462,11 +462,11 @@ module.exports = {
 		}
 
 		return payload;
-
 	},
 
 
 
+	//// ORDER API SECTION ////
 	basicOrderAPICheck: function(json) {
 
 		var passFailCheckList = {
@@ -666,8 +666,6 @@ module.exports = {
 		  return itemVsShipments;
 	},
 
-
-
 	checkItemsArray: function(itemsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
 		var itemsValidation = [];
@@ -768,8 +766,6 @@ module.exports = {
 		}
 		return itemsValidation;
 	},
-
-
 
 	checkShipmentsArray: function(shipmentsArray) {
 		// 2 sections here: loop through the array, call the checker on each items object
@@ -926,8 +922,6 @@ module.exports = {
 		return shipmentsValidation
 	},
 
-
-
 	checkBillingObject: function(billing) {
 		if (billing.billed_to === undefined) {
 			return "Fail - 'billed_to' object is not found"
@@ -979,8 +973,6 @@ module.exports = {
 
 		return validatedBilling;
 	},
-
-
 
 	checkCustomerObject: function(customer) {
 		var validatedCustomer = {
